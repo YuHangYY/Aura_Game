@@ -30,7 +30,6 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		FVector SocketLocation =  CombatInterface->GetCombaWeaponLocation();
 		FTransform SpawnTransform;
 		FRotator Rotation =(ProjectileTargetLocation - SocketLocation).Rotation();
-		Rotation.Pitch = 0;
 		
 		SpawnTransform.SetLocation(SocketLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
