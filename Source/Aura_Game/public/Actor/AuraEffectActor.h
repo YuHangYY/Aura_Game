@@ -48,6 +48,9 @@ public:
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Apply Effects")
 	bool bDestroyOnEffectRemove = false;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Apply Effects")
+	bool bApplyEffectToEnemy = false;
 protected:
 	virtual void BeginPlay() override;
 	

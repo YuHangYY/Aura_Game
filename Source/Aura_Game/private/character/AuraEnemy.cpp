@@ -6,7 +6,11 @@
 #include "UAuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AI/AuraAIController.h"
 #include "Aura_Game/Aura_Game.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BTFunctionLibrary.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Library/AuraWidgetControllerLibrary.h"
@@ -25,6 +29,26 @@ AAuraEnemy::AAuraEnemy()
 	
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+	
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll =false;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true ;
+	
+	
+}
+
+void AAuraEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	AuraAIController = Cast<AAuraAIController>(NewController);
+	
+	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);//初始化黑板
+	AuraAIController->RunBehaviorTree(BehaviorTree);//激活行为树
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReaching"),false);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("IsRange"),CharacterClass != ECharacterClass::Warrior);
+	
+	
 }
 
 void AAuraEnemy::HighlightActor()
@@ -101,6 +125,8 @@ void AAuraEnemy::OnHitReactChange(const FGameplayTag Tag, int32 NewCount)
 	//如果当前标签计数大于0，代表被应用了这个标签，此时将速度设置为0；反之
 	bIsHitReact = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bIsHitReact ? 0:BaseWalkSpeed;
+	
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReaching"),bIsHitReact);
 }
 
 void AAuraEnemy::InitAbilityActorInfo()

@@ -3,11 +3,14 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "character/AuraCharacterBase.h"
 #include "Interaction/EnemyInterface.h"
 #include "UI/Widget/OverlapWidgetController.h"
 #include "AuraEnemy.generated.h"
 
+class AAuraAIController;
+class UBehaviorTree;
 enum class ECharacterClass : uint8;
 class UWidgetComponent;
 /**
@@ -20,6 +23,7 @@ class AURA_GAME_API AAuraEnemy : public AAuraCharacterBase,public IEnemyInterfac
 public:
 	AAuraEnemy();
 	
+	virtual void PossessedBy(AController* NewController) override;
 	//接口实现函数
 	virtual  void HighlightActor() override;
 	virtual  void UnHighlightActor() override;
@@ -50,6 +54,15 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
+	
+	UPROPERTY(EditAnywhere,Category="AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+	
+	UPROPERTY()
+    TObjectPtr<AAuraAIController> AuraAIController;
+	
+	
+	//黑板键
 private:
 	
 	UFUNCTION()
@@ -60,6 +73,7 @@ private:
 	
 	UPROPERTY(EditAnywhere,Category="Character class Default")
 	ECharacterClass CharacterClass = ECharacterClass::Warrior;
+	
 	
 	
 };
