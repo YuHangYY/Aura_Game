@@ -54,4 +54,11 @@ void FUAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Lightning,GameplayTags.Attribute_Resistance_Lightning);
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Arcane,GameplayTags.Attribute_Resistance_Arcane);
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Physical,GameplayTags.Attribute_Resistance_Physical);
+	
+	//Montage
+	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.Weapon"),FString());
+	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.RightHand"),FString());
+	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.LeftHand"),FString());
+	
+	GameplayTags.Ability_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack.Melee"),FString());
 }

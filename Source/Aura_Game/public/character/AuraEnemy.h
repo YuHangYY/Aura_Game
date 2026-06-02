@@ -27,6 +27,8 @@ public:
 	//接口实现函数
 	virtual  void HighlightActor() override;
 	virtual  void UnHighlightActor() override;
+	virtual void SetCombatTarget_Implementation(AActor* Target) override;
+	virtual AActor* GetCombatTarget_Implementation() override;
 	//end
 	
 	virtual int32 GetPlayerLevel() override;
@@ -40,11 +42,14 @@ public:
 	UPROPERTY(BlueprintReadOnly,Category="Combat")
 	bool bIsHitReact = false;
 	
-	UPROPERTY(BlueprintReadOnly,Category="Combat")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
 	float BaseWalkSpeed = 250.f;
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Combat")
 	float LifeSpan = 5.f;
+	
+	UPROPERTY(BlueprintReadOnly,Category="Combat")
+	AActor* CombatTarget;
 	
 	virtual void Die() override;
 protected:

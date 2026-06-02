@@ -64,6 +64,16 @@ void AAuraEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
+void AAuraEnemy::SetCombatTarget_Implementation(AActor* Target)
+{
+	CombatTarget = Target;
+}
+
+AActor* AAuraEnemy::GetCombatTarget_Implementation()
+{
+	return CombatTarget;
+}
+
 int32 AAuraEnemy::GetPlayerLevel()
 {
 	return Level;
@@ -82,7 +92,11 @@ void AAuraEnemy::BeginPlay()
 	//初始化组件的拥有者和扮演者，拥有者代表逻辑上，扮演者代表世界里的
 	InitAbilityActorInfo();
 	
-	UAuraWidgetControllerLibrary::GiveEnemyStartUpAbilities(this,AbilitySystemComponent);
+	if (HasAuthority())
+	{
+		UAuraWidgetControllerLibrary::GiveEnemyStartUpAbilities(this,AbilitySystemComponent,CharacterClass);
+	}
+	
 	
 	
 	if (UAuraUserWidget* Widget = Cast<UAuraUserWidget>(HealthBar->GetUserWidgetObject()))
@@ -125,14 +139,22 @@ void AAuraEnemy::OnHitReactChange(const FGameplayTag Tag, int32 NewCount)
 	bIsHitReact = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bIsHitReact ? 0:BaseWalkSpeed;
 	
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReaching"),bIsHitReact);
+	if (AuraAIController&&AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReaching"),bIsHitReact);
+	}
+	
 }
 
 void AAuraEnemy::InitAbilityActorInfo()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this,this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-	InitializeDefaultAttribute();
+	if (HasAuthority())
+	{
+		InitializeDefaultAttribute();
+	}
+	
 }
 
 void AAuraEnemy::InitializeDefaultAttribute() const

@@ -30,7 +30,7 @@ public:
 	static void InitializeCharacterClassInfo(const UObject* WorldContextObject,ECharacterClass CharacterClass,float Level,UAbilitySystemComponent* ASC);
 	
 	UFUNCTION(BlueprintCallable,Category="Aura")
-	static void GiveEnemyStartUpAbilities(const UObject* WorldContextObject,UAbilitySystemComponent* ASC);
+	static void GiveEnemyStartUpAbilities(const UObject* WorldContextObject,UAbilitySystemComponent* ASC,ECharacterClass CharacterClass);
 	
 	UFUNCTION(BlueprintCallable,Category="Aura")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
@@ -47,4 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Effect")
 	static void SetCriticalHit(FGameplayEffectContextHandle& EffectContextHandle,bool bCriticalHit);
 	
+	UFUNCTION(BlueprintCallable, Category="Effect")
+	static void GetLifeActorWithingRadius(const UObject* WorldContextObject,TArray<AActor*> &OutActors,const TArray<AActor*> OtherActors,float Radius,FVector SphereLocation);
+	
+	UFUNCTION(BlueprintCallable, Category="Effect")
+	static bool ISBothFirend(AActor*FirstActor,AActor* SecondActor);
 };

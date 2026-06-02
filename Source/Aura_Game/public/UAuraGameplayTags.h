@@ -45,7 +45,8 @@ public:
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
 	
-	
+	//Abilities
+	FGameplayTag Ability_Attack_Melee;
 	
 	//Effect
 	FGameplayTag Effects_HitReact;
@@ -56,6 +57,11 @@ public:
 	FGameplayTag DamageTag_Lightning;//雷电伤害
 	FGameplayTag DamageTag_Arcane;//奥术伤害
 	FGameplayTag DamageTag_Physical;//物理伤害
+	
+	//Montage
+	FGameplayTag Montage_Attack_Weapon;
+	FGameplayTag Montage_Attack_RightHand;
+	FGameplayTag Montage_Attack_LeftHand;
 	
 	TMap<FGameplayTag,FGameplayTag> DamageTypesTOResistances;
 protected:

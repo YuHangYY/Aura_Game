@@ -24,6 +24,9 @@ struct FCharacterClassDefaultInfo
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Default class")
 	TSubclassOf<UGameplayEffect> PrimaryAttributes;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Default class ")
+	TArray<TSubclassOf<UGameplayAbility>> DedicatedAbilities;
 };
 
 UCLASS()

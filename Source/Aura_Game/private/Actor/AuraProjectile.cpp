@@ -11,6 +11,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Aura_Game/Aura_Game.h"
 #include "Components/AudioComponent.h"
+#include "Library/AuraWidgetControllerLibrary.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -48,10 +49,32 @@ void AAuraProjectile::BeginPlay()
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!DamageEffectSpecHandle.IsValid() ||
+		!DamageEffectSpecHandle.Data.IsValid())
+	{
+		return;
+	}
+	if (DamageEffectSpecHandle.IsValid()&& DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	{
+		return;
+	}
+	if (!OtherActor)
+	{
+		return;
+	}
+	if (!UAuraWidgetControllerLibrary::ISBothFirend(DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser(),OtherActor))
+	{
+		return;
+	}
+
 	
 	UGameplayStatics::PlaySoundAtLocation(this,ImpactSound,GetActorLocation());
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-	LoopPtr->Stop();
+	if (LoopPtr)
+	{
+		LoopPtr->Stop();
+	}
+
 	if (HasAuthority())
 	{
 		if (UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
@@ -73,7 +96,11 @@ void AAuraProjectile::Destroyed()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this,ImpactSound,GetActorLocation());
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-		LoopPtr->Stop();
+		if (LoopPtr)
+		{
+			LoopPtr->Stop();
+		}
+		
 	}
 	
 	Super::Destroyed();

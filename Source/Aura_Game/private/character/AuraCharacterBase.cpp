@@ -4,6 +4,7 @@
 #include "character/AuraCharacterBase.h"
 
 #include "AbilitySystemComponent.h"
+#include "UAuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura_Game/Aura_Game.h"
 #include "Components/CapsuleComponent.h"
@@ -64,6 +65,7 @@ void AAuraCharacterBase::OnMulticastClientDeath_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	DisSolve();
+	bIsDead = true;
 }
 
 void AAuraCharacterBase::BeginPlay()
@@ -78,15 +80,52 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 	
 }
 
-FVector AAuraCharacterBase::GetCombaWeaponLocation()
+
+FVector AAuraCharacterBase::GetCombaWeaponLocation_Implementation(const FGameplayTag& MontageTag)
 {
-	return Weapon->GetSocketLocation(SocketWeaponName);
+	const FUAuraGameplayTags& TagContain = FUAuraGameplayTags::Get();
+	if (MontageTag.MatchesTagExact(TagContain.Montage_Attack_Weapon)&&IsValid(Weapon))
+	{
+		return  Weapon->GetSocketLocation(SocketWeaponName);
+	}
+	
+	if (MontageTag.MatchesTagExact(TagContain.Montage_Attack_LeftHand))
+	{
+		return  GetMesh()->GetSocketLocation(SocketLeftName);
+	}
+	
+	if (MontageTag.MatchesTagExact(TagContain.Montage_Attack_RightHand))
+	{
+		return  GetMesh()->GetSocketLocation(SocketRightName);
+	}
+	return FVector();
 }
 
 UAnimMontage* AAuraCharacterBase::GetHitAnimMontage_Implementation()
 {
 	return HitReactMontage;
 }
+
+bool AAuraCharacterBase::IsDead_Implementation() const
+{
+	return bIsDead;
+}
+
+AActor* AAuraCharacterBase::GetAvatar_Implementation()
+{
+	return this;
+}
+
+TArray<FTaggedMontage>  AAuraCharacterBase::GetAttackAnimMontage_Implementation()
+{
+	return AttackMontage;
+}
+
+UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
 
 void AAuraCharacterBase::ApplyEffectToSelf(TSubclassOf<UGameplayEffect> EffectClass, float Level)const
 {
@@ -113,6 +152,7 @@ void AAuraCharacterBase::AddCharacterAbilities()
 	ASC->AddCharacterAbilities(StartUpAbilities);
 	
 }
+
 
 
 

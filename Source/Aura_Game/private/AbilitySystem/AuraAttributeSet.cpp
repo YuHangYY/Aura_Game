@@ -133,6 +133,14 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				const bool isBlock = UAuraWidgetControllerLibrary::IsBlockedHit(Props.SourceEffectContextHandle);
 				const bool isCritical = UAuraWidgetControllerLibrary::IsCriticalHit(Props.SourceEffectContextHandle);
 				PC->ShowDamageText(LocalIncomingDamage,Props.TargetAvatarCharacter,isBlock,isCritical);
+				return;
+			}
+			
+			if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.TargetPC))
+			{
+				const bool isBlock = UAuraWidgetControllerLibrary::IsBlockedHit(Props.SourceEffectContextHandle);
+				const bool isCritical = UAuraWidgetControllerLibrary::IsCriticalHit(Props.SourceEffectContextHandle);
+				PC->ShowDamageText(LocalIncomingDamage,Props.TargetAvatarCharacter,isBlock,isCritical);
 			}
 		}
 	}

@@ -4,9 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "GameplayTagContainer.h"
 #include "CombatInterface.generated.h"
+class UNiagaraSystem;
+struct FGameplayTag;
 class UAnimMontage;
 // This class does not need to be modified.
+
+USTRUCT(BlueprintType)
+struct FTaggedMontage
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	UAnimMontage* AttackMontage; 
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	FGameplayTag MontageTag;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	USoundBase* ImpactSound = nullptr;
+};
+
 UINTERFACE(MinimalAPI,BlueprintType)
 class UCombatInterface : public UInterface
 {
@@ -24,7 +43,8 @@ class AURA_GAME_API ICombatInterface
 public:
 	virtual int32 GetPlayerLevel();
 	
-	virtual FVector GetCombaWeaponLocation();
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	 FVector GetCombaWeaponLocation(const FGameplayTag& MontageTag);
 	
 	UFUNCTION(BlueprintImplementableEvent,BlueprintCallable)
 	void UpdateFacingTarget(const FVector& Target);
@@ -32,5 +52,17 @@ public:
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	UAnimMontage* GetHitAnimMontage();
 	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	TArray<FTaggedMontage> GetAttackAnimMontage();
+	
 	virtual void Die() = 0;
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	bool IsDead()const;
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	AActor* GetAvatar();
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	UNiagaraSystem* GetBloodEffect();
 };

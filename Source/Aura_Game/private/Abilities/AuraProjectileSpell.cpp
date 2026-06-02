@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "UAuraGameplayTags.h"
 #include "Actor/AuraProjectile.h"
+#include "character/AuraCharacter.h"
 #include "Interaction/CombatInterface.h"
 
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -20,14 +21,12 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 
 void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
 {
-	const bool IsServer = GetAvatarActorFromActorInfo()->HasAuthority();//要在服务器上调用
+	const bool IsServer =GetActorInfo().AvatarActor.Get()->HasAuthority() ;//要在服务器上调用
 	
 	if (!IsServer) return;
-	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());//当前调用技能的是，然后获取插槽位置
-	if (CombatInterface)
-	{
+	
 		//设置当前生成位置等属性
-		FVector SocketLocation =  CombatInterface->GetCombaWeaponLocation();
+		FVector SocketLocation =  ICombatInterface::Execute_GetCombaWeaponLocation(GetAvatarActorFromActorInfo(),FUAuraGameplayTags::Get().Montage_Attack_Weapon);
 		FTransform SpawnTransform;
 		FRotator Rotation =(ProjectileTargetLocation - SocketLocation).Rotation();
 		
@@ -43,7 +42,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		
 		const UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 		FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
-		const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec(DamageEffect,GetAbilityLevel(),EffectContext);
+		const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec(DamageEffect,Cast<ICombatInterface>(GetAvatarActorFromActorInfo())->GetPlayerLevel(),EffectContext);
 		
 		for (auto& Pair : DamageTypes)
 		{
@@ -52,8 +51,9 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		}
 		
 		Projectile->DamageEffectSpecHandle = EffectSpecHandle;
-		
+	
 		
 		Projectile->FinishSpawning(SpawnTransform);
-	}
+	
 }
+

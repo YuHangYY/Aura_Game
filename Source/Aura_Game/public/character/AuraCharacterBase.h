@@ -10,6 +10,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UNiagaraSystem;
 class UGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
@@ -27,7 +28,7 @@ public:
 	//获取属性集
 	UAttributeSet* GetAttributeSet() const{return AttributeSet;}
 	
-	virtual void Die() override; 
+	
 	
 	UFUNCTION(NetMulticast,Reliable)
 	void OnMulticastClientDeath();
@@ -55,9 +56,21 @@ protected:
 	UPROPERTY(EditAnywhere,Category="Combat")
 	FName SocketWeaponName;
 	
-	virtual FVector GetCombaWeaponLocation()override;
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName SocketLeftName;
 	
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName SocketRightName;
+	
+	bool bIsDead = false;
+	
+	virtual void Die() override; 
+	virtual FVector GetCombaWeaponLocation_Implementation(const FGameplayTag& MontageTag)override;
 	virtual UAnimMontage*GetHitAnimMontage_Implementation()override;
+	virtual bool IsDead_Implementation() const override;
+	virtual AActor* GetAvatar_Implementation() override;
+	virtual TArray<FTaggedMontage> GetAttackAnimMontage_Implementation() override;
+	virtual UNiagaraSystem* GetBloodEffect_Implementation()  override ;
 	
 	//技能系统组件
 	UPROPERTY()
@@ -80,10 +93,18 @@ protected:
 	virtual void InitializeDefaultAttribute()const;
 	
 	void AddCharacterAbilities();
+	
+	UPROPERTY(EditAnywhere,Category="Combat")
+	UNiagaraSystem* BloodEffect;
+	
 private:
 	UPROPERTY(EditAnywhere,Category="Ability")
 	TArray<TSubclassOf<UGameplayAbility>> StartUpAbilities;
 	
 	UPROPERTY(EditAnywhere,Category="Combat")
 	TObjectPtr<UAnimMontage> HitReactMontage;
+	
+	UPROPERTY(EditAnywhere,Category="Combat")
+	TArray<FTaggedMontage> AttackMontage;
+	
 };

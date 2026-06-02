@@ -20,7 +20,12 @@ struct AuraDamageStatics
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitChance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitDamage);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(FireResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(LightningResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(ArcaneResistance);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(PhysicalResistance);
 	
+	TMap<FGameplayTag,FGameplayEffectAttributeCaptureDefinition> TagToCaptureDef;
 	AuraDamageStatics()
 	{
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,Armor,Target,false);
@@ -29,12 +34,32 @@ struct AuraDamageStatics
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,CriticalHitChance,Source,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,CriticalHitDamage,Source,false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,CriticalHitResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,FireResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,LightningResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,ArcaneResistance,Target,false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet,PhysicalResistance,Target,false);
+		
+		
+		
+		
+		
 	}
 };
 
 static const AuraDamageStatics& DamageStatics()
 {
 	static AuraDamageStatics Statics; //全局实例 
+	const FUAuraGameplayTags& Tags = FUAuraGameplayTags::Get(); 
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Secondary_Armor,Statics.ArmorDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Secondary_ArmorPenetration,Statics.ArmorPenetrationDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Secondary_BlockChance,Statics.BlockChanceDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Secondary_CriticalHitChance,Statics.CriticalHitChanceDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Secondary_CriticalHitDamage,Statics.CriticalHitDamageDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Secondary_CriticalHitResistance,Statics.CriticalHitResistanceDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Resistance_Fire,Statics.FireResistanceDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Resistance_Lightning,Statics.LightningResistanceDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Resistance_Arcane,Statics.ArcaneResistanceDef);
+	Statics.TagToCaptureDef.Add(Tags.Attribute_Resistance_Physical,Statics.PhysicalResistanceDef);
 	return Statics;
 }
 
@@ -46,6 +71,10 @@ UExecCalc_Damage::UExecCalc_Damage()
 	RelevantAttributesToCapture.Add(DamageStatics().CriticalHitChanceDef);
 	RelevantAttributesToCapture.Add(DamageStatics().CriticalHitDamageDef);
 	RelevantAttributesToCapture.Add(DamageStatics().CriticalHitResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStatics().FireResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStatics().LightningResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStatics().ArcaneResistanceDef);
+	RelevantAttributesToCapture.Add(DamageStatics().PhysicalResistanceDef);
 }
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
@@ -69,9 +98,22 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	AggregatorEvaluatorParams.TargetTags = TargetTag;
 	
 	float Damage = 0.f;	
-	for (auto DamageTag : FUAuraGameplayTags::Get().DamageTypesTOResistances)
+	for (TPair<FGameplayTag, FGameplayTag> Pair : FUAuraGameplayTags::Get().DamageTypesTOResistances)
 	{
-		const float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTag.Key);
+		const FGameplayTag DamageTypeTag = Pair.Key;
+		const FGameplayTag ResistanceTypeTag = Pair.Value;
+		
+		check(DamageStatics().TagToCaptureDef.Contains(ResistanceTypeTag));
+		const FGameplayEffectAttributeCaptureDefinition ResistanceDef = DamageStatics().TagToCaptureDef[ResistanceTypeTag];
+		
+		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag);
+		
+		
+		float Resistance = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(ResistanceDef,AggregatorEvaluatorParams,Resistance);
+		Resistance = FMath::Clamp(Resistance,0.f,100.f);
+		
+		DamageTypeValue *= (100.f - Resistance)/100.f;
 		Damage += DamageTypeValue;
 	}
 	

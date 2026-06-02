@@ -12,7 +12,7 @@ class UAuraAttributeSet;
 void UAttributeMenuWidgetController::BindCallbackToDependencies()
 {
 	UAuraAttributeSet* AS = Cast<UAuraAttributeSet>(AttributeSet);
-	for (auto& pair:AS->TagToAttributeMapping)
+	for (TPair<FGameplayTag, FGameplayAttribute(*)()>& pair:AS->TagToAttributeMapping)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(pair.Value()).AddLambda(
 		[this,pair](const FOnAttributeChangeData& Data)
