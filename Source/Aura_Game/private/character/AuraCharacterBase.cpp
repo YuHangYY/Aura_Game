@@ -8,6 +8,7 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "Aura_Game/Aura_Game.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AAuraCharacterBase::AAuraCharacterBase()
@@ -54,6 +55,7 @@ void AAuraCharacterBase::DisSolve()
 
 void AAuraCharacterBase::OnMulticastClientDeath_Implementation()
 {
+	UGameplayStatics::PlaySoundAtLocation(this,DeathSound,GetActorLocation());
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -84,19 +86,23 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 FVector AAuraCharacterBase::GetCombaWeaponLocation_Implementation(const FGameplayTag& MontageTag)
 {
 	const FUAuraGameplayTags& TagContain = FUAuraGameplayTags::Get();
-	if (MontageTag.MatchesTagExact(TagContain.Montage_Attack_Weapon)&&IsValid(Weapon))
+	if (MontageTag.MatchesTagExact(TagContain.CombatSocket_Weapon)&&IsValid(Weapon))
 	{
 		return  Weapon->GetSocketLocation(SocketWeaponName);
 	}
 	
-	if (MontageTag.MatchesTagExact(TagContain.Montage_Attack_LeftHand))
+	if (MontageTag.MatchesTagExact(TagContain.CombatSocket_LeftHand))
 	{
 		return  GetMesh()->GetSocketLocation(SocketLeftName);
 	}
 	
-	if (MontageTag.MatchesTagExact(TagContain.Montage_Attack_RightHand))
+	if (MontageTag.MatchesTagExact(TagContain.CombatSocket_RightHand))
 	{
 		return  GetMesh()->GetSocketLocation(SocketRightName);
+	}
+	if (MontageTag.MatchesTagExact(TagContain.CombatSocket_Tail))
+	{
+		return GetMesh()->GetSocketLocation(SocketTailName);
 	}
 	return FVector();
 }
@@ -124,6 +130,28 @@ TArray<FTaggedMontage>  AAuraCharacterBase::GetAttackAnimMontage_Implementation(
 UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
 {
 	return BloodEffect;
+}
+
+FTaggedMontage AAuraCharacterBase::GetTaggedMontage_Implementation(const FGameplayTag& MontageTag)
+{
+	for (FTaggedMontage TaggedMontage : AttackMontage)
+	{
+		if (TaggedMontage.MontageTag == MontageTag)
+		{
+			return TaggedMontage;
+		}
+	}
+	return FTaggedMontage();
+}
+
+int32 AAuraCharacterBase::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void AAuraCharacterBase::SetMinionCount_Implementation(int32 NewCount)
+{
+	MinionCount+=NewCount;
 }
 
 

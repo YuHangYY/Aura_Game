@@ -23,6 +23,9 @@ struct FTaggedMontage
 	FGameplayTag MontageTag;
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	FGameplayTag SocketTag;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	USoundBase* ImpactSound = nullptr;
 };
 
@@ -65,4 +68,13 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	UNiagaraSystem* GetBloodEffect();
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	FTaggedMontage GetTaggedMontage(const FGameplayTag& MontageTag);
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	int32 GetMinionCount();
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	void SetMinionCount(int32 NewCount);
 };

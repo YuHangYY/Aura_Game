@@ -19,17 +19,20 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	
 }
 
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation,const FGameplayTag& SocketTag,bool IsOverPitch,float OverridePitch)
 {
 	const bool IsServer =GetActorInfo().AvatarActor.Get()->HasAuthority() ;//要在服务器上调用
 	
 	if (!IsServer) return;
 	
 		//设置当前生成位置等属性
-		FVector SocketLocation =  ICombatInterface::Execute_GetCombaWeaponLocation(GetAvatarActorFromActorInfo(),FUAuraGameplayTags::Get().Montage_Attack_Weapon);
+		FVector SocketLocation =  ICombatInterface::Execute_GetCombaWeaponLocation(GetAvatarActorFromActorInfo(),SocketTag);
 		FTransform SpawnTransform;
 		FRotator Rotation =(ProjectileTargetLocation - SocketLocation).Rotation();
-		
+		if (IsOverPitch)
+		{
+			Rotation.Pitch = OverridePitch;
+		}
 		SpawnTransform.SetLocation(SocketLocation);
 		SpawnTransform.SetRotation(Rotation.Quaternion());
 		

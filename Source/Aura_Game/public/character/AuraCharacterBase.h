@@ -45,6 +45,10 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> WeaponDisSolveMaterial;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
+	USoundBase* DeathSound;
+	
 protected:
 	
 	virtual void BeginPlay() override;
@@ -62,6 +66,9 @@ protected:
 	UPROPERTY(EditAnywhere,Category="Combat")
 	FName SocketRightName;
 	
+	UPROPERTY(EditAnywhere,Category="Combat")
+	FName SocketTailName;
+	
 	bool bIsDead = false;
 	
 	virtual void Die() override; 
@@ -71,6 +78,9 @@ protected:
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual TArray<FTaggedMontage> GetAttackAnimMontage_Implementation() override;
 	virtual UNiagaraSystem* GetBloodEffect_Implementation()  override ;
+	virtual FTaggedMontage GetTaggedMontage_Implementation(const FGameplayTag& MontageTag) override;
+	virtual int32 GetMinionCount_Implementation() override;
+	virtual void SetMinionCount_Implementation(int32 NewCount) override;
 	
 	//技能系统组件
 	UPROPERTY()
@@ -96,6 +106,8 @@ protected:
 	
 	UPROPERTY(EditAnywhere,Category="Combat")
 	UNiagaraSystem* BloodEffect;
+	
+	int32 MinionCount = 0;
 	
 private:
 	UPROPERTY(EditAnywhere,Category="Ability")

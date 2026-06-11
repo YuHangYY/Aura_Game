@@ -52,7 +52,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	CursorTrace();
 	AutoMoveing();
 }
-
+ 
 
 void AAuraPlayerController::ShowDamageText_Implementation(float Damage,ACharacter* Chara,bool IsBlock,bool IsCritical)
 {

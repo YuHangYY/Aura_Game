@@ -2,6 +2,8 @@
 
 
 #include "UAuraGameplayTags.h"
+
+#include "AIController.h"
 #include"GameplayTagsManager.h"
 
 FUAuraGameplayTags FUAuraGameplayTags::GameplayTags;
@@ -55,10 +57,18 @@ void FUAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Arcane,GameplayTags.Attribute_Resistance_Arcane);
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Physical,GameplayTags.Attribute_Resistance_Physical);
 	
+	//CombatSocket
+	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),FString());
+	GameplayTags.CombatSocket_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.RightHand"),FString());
+	GameplayTags.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.LeftHand"),FString());
+	GameplayTags.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Tail"),FString());
+	
 	//Montage
-	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.Weapon"),FString());
-	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.RightHand"),FString());
-	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.LeftHand"),FString());
+	GameplayTags.Montage_Attack_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.1"),FString());
+	GameplayTags.Montage_Attack_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.2"),FString());
+	GameplayTags.Montage_Attack_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.3"),FString());
+	GameplayTags.Montage_Attack_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Montage.Attack.4"),FString());
 	
 	GameplayTags.Ability_Attack_Melee = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Attack.Melee"),FString());
+	GameplayTags.Ability_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Summon"),FString());
 }
