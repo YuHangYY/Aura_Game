@@ -7,6 +7,9 @@
 #include "UI/Widget/AuraWidgetController.h"
 #include "OverlapWidgetController.generated.h"
 
+struct FAbilityInfo;
+class UAuraAbilitySystemComponent;
+class UAuraAbilityInfo;
 class UAuraUserWidget;
 
 USTRUCT(BlueprintType)
@@ -32,6 +35,7 @@ struct FOnAttributeChangeData;
 //动态多播委托
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangeSign,float,Newvalue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSign,FUIWidgetRow,Row);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSign,const FAbilityInfo& ,ABilityInfo);
 
 
 /**
@@ -64,14 +68,22 @@ public:
 	
 	UPROPERTY(BlueprintAssignable,Category="GAS|Message")
 	FMessageWidgetRowSign MessageWidgetRowDelegate;
+	
+	UPROPERTY(BlueprintAssignable,Category="GAS|Delegate")
+	FAbilityInfoSign AbilityInfoDelegate;
 	/*多播委托的变量*/
 protected:
 	
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="WidgetMessage")
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Widget Data")
+	TObjectPtr<UAuraAbilityInfo> AbilityInfo; 
 	
 	template<class T>
 	T* GetDataTableRowByTag(UDataTable* Table,FGameplayTag& Tag);
+	
+	void OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraAsc);
 };
 
 template <class T>

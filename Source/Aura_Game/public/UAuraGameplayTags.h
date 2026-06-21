@@ -46,8 +46,13 @@ public:
 	FGameplayTag InputTag_4;
 	
 	//Abilities
-	FGameplayTag Ability_Attack_Melee;
+	FGameplayTag Ability_Attack;
 	FGameplayTag Ability_Summon;
+	
+	
+	FGameplayTag Ability_Fire_FireBolt;
+	
+	FGameplayTag Cooldown_Fire_FireBolt;
 	
 	//Effect
 	FGameplayTag Effects_HitReact;

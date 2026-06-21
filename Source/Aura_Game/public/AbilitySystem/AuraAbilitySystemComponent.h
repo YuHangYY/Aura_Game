@@ -6,7 +6,10 @@
 #include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags,const FGameplayTagContainer& AssetTags);
+class UAuraAbilitySystemComponent;
+DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& AssetTags);
+DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven,UAuraAbilitySystemComponent*);
+DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&);
 
 /**
  * 
@@ -24,7 +27,18 @@ public:
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagRelease(const FGameplayTag& InputTag);
 	
+	void ForEachAbility(const FForEachAbility& Delegate);
+	
+	 void OnRep_ActivateAbilities()override;
+	
+	
+	FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	
 	FEffectAssetTags EffectAssetTags;
+	FAbilitiesGiven FAbilityGivenDelegate;
+	
+	bool bAbilityGiven = false;
 protected:
 	UFUNCTION(Client,Reliable)
 	void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveGameplayEffectHandle);

@@ -37,7 +37,7 @@ void AAuraHUD::InitOverlap(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	const FWidgetControllerParams Params(PC,PS,Asc,As);
 	UOverlapWidgetController* WidgetController = GetOverlapWidgetController(Params);
 	UAttributeMenuWidgetController* AttributeMenuWidgetController = GetAttributeMenuController(Params);
-	MainWidget->SetWidgetController(WidgetController);
+	MainWidget->SetWidgetController(WidgetController); 
 	//广播内部初始值给绑定的Widget
 	WidgetController->BroadcastInitialValues();
 	MainWidget->AddToViewport();

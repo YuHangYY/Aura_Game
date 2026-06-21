@@ -130,6 +130,7 @@ void AAuraPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	
 	//创建增强输入组件
+	
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 	AuraInputComponent->BindAction(MoveAction,ETriggerEvent::Triggered,this,&AAuraPlayerController::Move);
 	AuraInputComponent->BindAction(ShiftAction,ETriggerEvent::Started,this,&AAuraPlayerController::ShiftPressed);
