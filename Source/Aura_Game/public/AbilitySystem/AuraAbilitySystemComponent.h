@@ -7,6 +7,9 @@
 #include "AuraAbilitySystemComponent.generated.h"
 
 class UAuraAbilitySystemComponent;
+struct FGameplayTag;
+
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& AssetTags);
 DECLARE_MULTICAST_DELEGATE_OneParam(FAbilitiesGiven,UAuraAbilitySystemComponent*);
 DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&);
@@ -24,16 +27,24 @@ public:
 	void AbilityActorInfoSet();
 	
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartUpAbilities);
+	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& PassiveAbilities);
+	
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagRelease(const FGameplayTag& InputTag);
 	
 	void ForEachAbility(const FForEachAbility& Delegate);
 	
-	 void OnRep_ActivateAbilities()override;
+	virtual  void OnRep_ActivateAbilities()override;
 	
 	
 	FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	
+	
+	void UpgradeAttribute(const FGameplayTag& AttributeTag);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag);
 	
 	FEffectAssetTags EffectAssetTags;
 	FAbilitiesGiven FAbilityGivenDelegate;

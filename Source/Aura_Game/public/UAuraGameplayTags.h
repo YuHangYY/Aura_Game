@@ -76,6 +76,9 @@ public:
 	FGameplayTag Montage_Attack_3;
 	FGameplayTag Montage_Attack_4;
 	
+	//Meta
+	FGameplayTag Attribute_Meta_IncomingXP;
+	
 	TMap<FGameplayTag,FGameplayTag> DamageTypesTOResistances;
 protected:
 	

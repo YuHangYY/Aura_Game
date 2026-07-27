@@ -11,6 +11,7 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
 #include "UI/Widget/AuraWidgetController.h"
+#include "Widgets/SDMXReadOnlyFixturePatchList.h"
 
 UOverlapWidgetController* UAuraWidgetControllerLibrary::GetOverlapWidgetController(UObject* WorldContextObject)
 {
@@ -87,12 +88,12 @@ void UAuraWidgetControllerLibrary::GiveEnemyStartUpAbilities(const UObject* Worl
 	}
 	
 	FCharacterClassDefaultInfo DefaultInfo = Mode->CharacterClassInfo->GetCharacterClassDefaultInfo(CharacterClass);
-	if (ICombatInterface* Character = Cast<ICombatInterface>(ASC->GetAvatarActor()))
+	if (ASC->GetAvatarActor()->Implements<UCombatInterface>())
 	{
 		for (TSubclassOf<UGameplayAbility> Ability : DefaultInfo.DedicatedAbilities)
 		{
 		
-			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Ability,Character->GetPlayerLevel());
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Ability,ICombatInterface::Execute_GetPlayerLevel(ASC->GetAvatarActor()));
 			ASC->GiveAbility(Ability);
 		}
 	}
@@ -177,4 +178,15 @@ bool UAuraWidgetControllerLibrary::ISBothFirend(AActor* FirstActor, AActor* Seco
 	const bool IsFriend = IsBothEnemy || ISBothPlayer;
 	
 	return !IsFriend;
+}
+
+int32 UAuraWidgetControllerLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject,ECharacterClass CharacterClass, int32 Level)
+{
+	 UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (CharacterClassInfo==nullptr) return 0.f;
+	
+	const FCharacterClassDefaultInfo& ClassInfo = CharacterClassInfo->GetCharacterClassDefaultInfo(CharacterClass);
+	float XP = ClassInfo.XPReward.GetValueAtLevel(Level);
+	
+	return static_cast<int32>(XP);
 }

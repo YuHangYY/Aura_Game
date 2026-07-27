@@ -9,21 +9,24 @@
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* Target)
 {
-	ICombatInterface* Actor =Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
-	FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect,Actor->GetPlayerLevel());
-	
-	for (TTuple<FGameplayTag, FScalableFloat> Pair:DamageTypes)
+	if (GetAvatarActorFromActorInfo()->Implements<UCombatInterface>())
 	{
+		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect,ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
+	
+		for (TTuple<FGameplayTag, FScalableFloat> Pair:DamageTypes)
+		{
 		
-		float DamageMagnitudePair = Pair.Value.GetValueAtLevel(Actor->GetPlayerLevel());
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle,Pair.Key,DamageMagnitudePair);
+			float DamageMagnitudePair = Pair.Value.GetValueAtLevel(ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle,Pair.Key,DamageMagnitudePair);
+		}
+	
+		UAbilitySystemComponent* Asc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
+		if (Asc)
+		{
+			Asc->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data);
+		}
 	}
 	
-	UAbilitySystemComponent* Asc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
-	if (Asc)
-	{
-		Asc->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data);
-	}
 }
 
 FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontageFromArray(const TArray<FTaggedMontage>& MontageArray)

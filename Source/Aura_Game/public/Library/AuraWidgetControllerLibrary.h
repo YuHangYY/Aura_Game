@@ -52,4 +52,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
 	static bool ISBothFirend(AActor*FirstActor,AActor* SecondActor);
+	
+	UFUNCTION(BlueprintCallable, Category="Effect")
+	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject,ECharacterClass CharacterClass,int32 Level);
 };

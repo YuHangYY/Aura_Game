@@ -29,9 +29,10 @@ public:
 	virtual  void UnHighlightActor() override;
 	virtual void SetCombatTarget_Implementation(AActor* Target) override;
 	virtual AActor* GetCombatTarget_Implementation() override;
+	
 	//end
 	
-	virtual int32 GetPlayerLevel() override;
+	virtual int32 GetPlayerLevel_Implementation() override;
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangeSign OnHealthChange;
@@ -76,9 +77,7 @@ private:
 	UPROPERTY(EditAnywhere,Category="Character class Default")
 	int32 Level=1;
 	
-	UPROPERTY(EditAnywhere,Category="Character class Default")
-	ECharacterClass CharacterClass = ECharacterClass::Warrior;
-	
+
 	
 	
 };

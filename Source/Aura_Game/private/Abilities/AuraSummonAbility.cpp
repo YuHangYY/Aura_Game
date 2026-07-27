@@ -24,7 +24,7 @@ TArray<FVector> UAuraSummonAbility::GetSpawnLocations()
 			ChoseSpawnLocation = Hit.ImpactPoint;
 		}
 		Result.Add(ChoseSpawnLocation);
-	}
+	} 
 	
 	return Result;
 

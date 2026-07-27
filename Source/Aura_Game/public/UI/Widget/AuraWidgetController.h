@@ -10,6 +10,7 @@ class UAbilitySystemComponent;
 class APlayerState;
 class APlayerController;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateChangeSign,int32,Newvalue);
 //蓝图类型结构体方便初始化
 USTRUCT(BlueprintType)
 struct FWidgetControllerParams

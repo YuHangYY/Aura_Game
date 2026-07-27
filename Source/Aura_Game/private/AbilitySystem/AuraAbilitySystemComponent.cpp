@@ -3,9 +3,11 @@
 
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "UAuraGameplayTags.h"
 #include "Abilities/AuraGameplayAbility.h"
 #include "Aura_Game/AuraLogChannels.h"
+#include "Interaction/PlayerInterface.h"
 
 void UAuraAbilitySystemComponent::AbilityActorInfoSet()
 {
@@ -38,6 +40,15 @@ void UAuraAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf
 	bAbilityGiven = true;
 	FAbilityGivenDelegate.Broadcast(this);
 	
+}
+
+void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& PassiveAbilities)
+{
+	for (const TSubclassOf<UGameplayAbility> AbilityClass : PassiveAbilities)
+	{
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass,1);
+		GiveAbilityAndActivateOnce(AbilitySpec);
+	}
 }
 
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -123,6 +134,34 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 		}
 	}
 	return FGameplayTag();
+}
+
+void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	//如果属性点大于0的时候调用服务器端去更改统一的属性点数据
+	if (GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		if (IPlayerInterface::Execute_GetAttributePoint(GetAvatarActor()) > 0)
+		{
+			ServerUpgradeAttribute(AttributeTag);
+		}
+		
+	}
+}
+
+void UAuraAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)
+{
+	FGameplayEventData Payload;
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = 1.f;
+	
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(),AttributeTag,Payload);
+	
+	if (GetAvatarActor()->Implements<UPlayerInterface>())
+	{
+		IPlayerInterface::Execute_AddToAttributePoint(GetAvatarActor(),-1);
+	} 
+		
 }
 
 

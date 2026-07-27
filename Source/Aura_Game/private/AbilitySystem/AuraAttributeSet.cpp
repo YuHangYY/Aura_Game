@@ -6,9 +6,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
-#include "GameplayTagsManager.h"
 #include "UAuraGameplayTags.h"
 #include "Interaction/CombatInterface.h"
+#include "Interaction/PlayerInterface.h"
 #include "Library/AuraWidgetControllerLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/AuraPlayerController.h"
@@ -69,6 +69,23 @@ void UAuraAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallb
 	}
 }
 
+void UAuraAttributeSet::SendXPEvent(const FEffectProperties& Props)
+{
+	if (Props.TargetAvatarActor->Implements<UCombatInterface>())
+	{
+		const int32 TargetLevel = ICombatInterface::Execute_GetPlayerLevel(Props.TargetAvatarActor);
+		const ECharacterClass CharacterClass = ICombatInterface::Execute_GetCharacterClassByClass(Props.TargetAvatarActor);
+		const int32 XPForward = UAuraWidgetControllerLibrary::GetXPRewardForClassAndLevel(Props.TargetAvatarActor,CharacterClass,TargetLevel);
+		
+		FUAuraGameplayTags GameplayTags = FUAuraGameplayTags::Get();
+		
+		FGameplayEventData Payload ;
+		Payload.EventTag = GameplayTags.Attribute_Meta_IncomingXP;
+		Payload.EventMagnitude = XPForward;
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceAvatarActor,GameplayTags.Attribute_Meta_IncomingXP,Payload);
+	}
+}
+
 void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
@@ -108,8 +125,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 		{
 			float NewHealth = GetHealth() - LocalIncomingDamage;
 			SetHealth(FMath::Clamp(NewHealth,0.f,GetMaxHealth()));
-			const bool bDeath = GetHealth() <= 0.f;
 			
+			const bool bDeath = GetHealth() <= 0.f;
 			if (bDeath)
 			{
 				//死亡
@@ -117,6 +134,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				{
 					DieActor->Die();
 				}
+				//死亡掉落经验发送事件通知被动技能
+				SendXPEvent(Props);
 			}
 			else
 			{
@@ -144,6 +163,56 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 			}
 		}
 	}
+	
+	if (Data.EvaluatedData.Attribute == GetInComingXPAttribute())
+	{
+		const float LocalIncomingXP = GetInComingXP();
+		SetInComingXP(0.f);
+		  
+		if (Props.SourceAvatarActor->Implements<UCombatInterface>() && Props.SourceAvatarActor->Implements<UCombatInterface>())
+		{
+			const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceAvatarCharacter);
+			const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceAvatarCharacter);
+			const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceAvatarCharacter,CurrentXP + LocalIncomingXP);
+			
+			const int32 NumOfLevelUp = NewLevel - CurrentLevel;
+			if (NumOfLevelUp > 0)
+			{
+				const int32 LocalAttributePoint = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceAvatarCharacter,CurrentLevel);
+				const int32 LocalSpellPoint = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceAvatarCharacter,CurrentLevel);
+				
+				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceAvatarCharacter,NumOfLevelUp);
+				IPlayerInterface::Execute_AddToAttributePoint(Props.SourceAvatarCharacter,LocalAttributePoint);
+				IPlayerInterface::Execute_AddToSpellPoint(Props.SourceAvatarCharacter,LocalSpellPoint);
+				
+				bTopOffMana = true;
+				bTopOffHealth = true;
+				
+				IPlayerInterface::Execute_LevelUp(Props.SourceAvatarCharacter);
+			}
+			
+			IPlayerInterface::Execute_AddToXP(Props.SourceAvatarCharacter,LocalIncomingXP);
+		}
+	
+	}
+}
+
+void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+	
+	if (Attribute == GetMaxHealthAttribute()&&bTopOffHealth)
+	{
+		SetHealth(GetMaxHealth());
+		bTopOffHealth = false;
+	}
+	
+	if (Attribute == GetMaxManaAttribute() &&bTopOffMana)
+	{
+		SetMana(GetMaxMana());
+		bTopOffMana = false;
+	}
+	
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const

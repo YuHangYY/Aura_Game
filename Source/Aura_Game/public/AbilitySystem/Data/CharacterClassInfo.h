@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScalableFloat.h"
 #include "Engine/DataAsset.h"
 #include "CharacterClassInfo.generated.h"
 
@@ -22,11 +23,14 @@ struct FCharacterClassDefaultInfo
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Default class")
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Default class")
 	TSubclassOf<UGameplayEffect> PrimaryAttributes;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Default class ")
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Default class")
 	TArray<TSubclassOf<UGameplayAbility>> DedicatedAbilities;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Default class")
+	FScalableFloat XPReward = FScalableFloat();
 };
 
 UCLASS()

@@ -4,7 +4,9 @@
 #include "UI/Widget/OverlapWidgetController.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "Player/AuraPlayerState.h"
 #include "AbilitySystem/Data/AuraAbilityInfo.h"
+#include "AbilitySystem/Data/LevelUpInfo.h"
 
 void UOverlapWidgetController::BroadcastInitialValues()
 {
@@ -19,8 +21,19 @@ void UOverlapWidgetController::BroadcastInitialValues()
 
 void UOverlapWidgetController::BindCallbackToDependencies()
 {
+	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
+	AuraPlayerState->OnXPChangeDelegate.AddUObject(this,&UOverlapWidgetController::OnXpChange); 
+	AuraPlayerState->OnLevelChangeDelegate.AddLambda(
+		[this](int32 NewValue)
+		{
+			OnPlayerLevelChangeDelegate.Broadcast(NewValue);
+		}
+	);
+	
+	
+	
 	//绑定回调函数为属性
-	UAuraAttributeSet* AuraAttributeSet = Cast<UAuraAttributeSet>(AttributeSet);
+	UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).AddLambda(
 	     [this](const FOnAttributeChangeData&Data)
@@ -70,8 +83,6 @@ void UOverlapWidgetController::BindCallbackToDependencies()
 					 FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable,Tag);
 					 MessageWidgetRowDelegate.Broadcast(*Row);
 				 }
-	     		
-	     	
 			 }
 		  }
 	     );
@@ -96,4 +107,27 @@ void UOverlapWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemCo
 	  }
 	);
 	AuraAsc->ForEachAbility(BroadcastDelegate);
+}
+
+void UOverlapWidgetController::OnXpChange(int32 NewXP)
+{
+	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
+	const ULevelUpInfo* LevelUpInfo = AuraPlayerState->LeveLInfoPtr;
+	
+	const int32 Level = LevelUpInfo->FindLevelForXP(NewXP);
+	const int32 MaxLevel = LevelUpInfo->LeveLInformation.Num();
+	
+	if (Level <=MaxLevel && Level>0)
+	{
+		const int32 CurLevelUpRequirement = LevelUpInfo->LeveLInformation[Level].LevelUpRequirement;
+		const int32 PreLevelUpRequirement = LevelUpInfo->LeveLInformation[Level-1].LevelUpRequirement;
+			
+		const int32 DeltaLevelUpRequirement = CurLevelUpRequirement - PreLevelUpRequirement; //获取的是最大范围经验值 900-300
+		const int32 XPForLevel = NewXP - PreLevelUpRequirement;//获取当前范围经验值 500 - 300
+		
+		float XPPercent = static_cast<float>(XPForLevel) / static_cast<float>(DeltaLevelUpRequirement);
+		
+		OnXPPercentChangeDelegate.Broadcast(XPPercent);
+	}
+	
 }

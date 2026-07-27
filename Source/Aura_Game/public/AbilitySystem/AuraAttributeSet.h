@@ -67,6 +67,7 @@ public:
 	//某个 Attribute 真正被改掉之前，给你一次拦截和修改新值的机会。!!!!!!做数值限制（Clamp）
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
+	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 	
 	
 	TMap<FGameplayTag,TStaFuncPtr<FGameplayAttribute()>> TagToAttributeMapping;
@@ -158,11 +159,16 @@ public:
 	
 	//Meta Attributes//   元属性：不复制，在服务器端计算，计算最后独立的中介
 	
-	UPROPERTY(BlueprintReadOnly,ReplicatedUsing= OnRep_MaxMana,Category="Meta Attributes")
+	UPROPERTY(BlueprintReadOnly,Category="Meta Attributes")
 	FGameplayAttributeData IncomingDamage;//伤害计算
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,IncomingDamage);
 	
+	UPROPERTY(BlueprintReadOnly,Category="Meta Attributes")
+	FGameplayAttributeData InComingXP;//伤害计算
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet,InComingXP);
 	
+	bool bTopOffHealth = false;
+	bool bTopOffMana = false;
 	
 	/*start 函数*/
 	UFUNCTION()
@@ -229,4 +235,5 @@ public:
 	
 private:
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data,FEffectProperties& Props)const;
+	void SendXPEvent(const FEffectProperties& Props);
 };

@@ -27,8 +27,15 @@ public:
 	
 	void BroadcastAttributeInfo(const FGameplayTag& tag,const FGameplayAttribute& Attribute )const;
 	
+	UFUNCTION(BlueprintCallable)
+	void UpgradeAttribute(const FGameplayTag& AttributeTag);
+	
+	
 	UPROPERTY(BlueprintAssignable)
 	FAttributeMenuInfoDelegate AttributeInfoDelegate;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerStateChangeSign AttributePointChangeDelegate;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAttributeInfo> AttributeInfo;

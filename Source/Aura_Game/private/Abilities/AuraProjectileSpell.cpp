@@ -45,7 +45,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		
 		const UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 		FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
-		const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec(DamageEffect,Cast<ICombatInterface>(GetAvatarActorFromActorInfo())->GetPlayerLevel(),EffectContext);
+		const FGameplayEffectSpecHandle EffectSpecHandle = ASC->MakeOutgoingSpec(DamageEffect,ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()),EffectContext);
 		
 		for (auto& Pair : DamageTypes)
 		{
