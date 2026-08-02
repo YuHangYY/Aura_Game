@@ -6,6 +6,7 @@
 #include "UI/Widget/AttributeMenuWidgetController.h"
 #include "UI/Widget/AuraUserWidget.h"
 #include "UI/Widget/OverlapWidgetController.h"
+#include "UI/Widget/SpellMenuWidgetController.h"
 
 UOverlapWidgetController* AAuraHUD::GetOverlapWidgetController(const FWidgetControllerParams& Params)
 {
@@ -30,6 +31,17 @@ UAttributeMenuWidgetController* AAuraHUD::GetAttributeMenuController(const FWidg
 	return AttributeMenuController;
 }
 
+USpellMenuWidgetController* AAuraHUD::GetSpellMenuController(const FWidgetControllerParams& Params)
+{
+	if (SpellMenuController == nullptr)
+	{
+		SpellMenuController = NewObject<USpellMenuWidgetController>(this,SpellWidgetControllerClass);
+		SpellMenuController->SetWidgetControllerParams(Params);
+		SpellMenuController->BindCallbackToDependencies();
+	}
+	return SpellMenuController;
+}
+
 
 void AAuraHUD::InitOverlap(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* Asc, UAttributeSet* As)
 {
@@ -37,6 +49,7 @@ void AAuraHUD::InitOverlap(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	const FWidgetControllerParams Params(PC,PS,Asc,As);
 	UOverlapWidgetController* WidgetController = GetOverlapWidgetController(Params);
 	UAttributeMenuWidgetController* AttributeMenuWidgetController = GetAttributeMenuController(Params);
+	USpellMenuWidgetController* SpellMenuWidgetController = GetSpellMenuController(Params);
 	MainWidget->SetWidgetController(WidgetController); 
 	//广播内部初始值给绑定的Widget
 	WidgetController->BroadcastInitialValues();

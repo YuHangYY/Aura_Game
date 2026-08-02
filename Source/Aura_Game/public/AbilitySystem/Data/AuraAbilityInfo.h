@@ -12,6 +12,8 @@
  */
 
 
+class UGameplayAbility;
+
 USTRUCT(BlueprintType)
 struct FAbilityInfo
 {
@@ -23,6 +25,9 @@ struct FAbilityInfo
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTag InputTag = FGameplayTag();
 	
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag StatusTag = FGameplayTag();
+	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	FGameplayTag CooldownTag = FGameplayTag();
 	
@@ -31,6 +36,13 @@ struct FAbilityInfo
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	TObjectPtr<const UMaterialInstance> BackgroundMaterial = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	int32 LevelRequirement = 1;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	TSubclassOf<UGameplayAbility> GameplayAbility;
+	
 };
 
 

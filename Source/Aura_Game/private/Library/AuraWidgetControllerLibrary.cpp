@@ -47,8 +47,24 @@ UAttributeMenuWidgetController* UAuraWidgetControllerLibrary::GetAttributeMenuWi
 	return nullptr;
 }
 
+USpellMenuWidgetController* UAuraWidgetControllerLibrary::GetSpellMenuWidgetController(UObject* WorldContextObject)
+{
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject,0))
+	{
+		if (AAuraHUD* HUD = Cast<AAuraHUD>(PC->GetHUD()))
+		{
+			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
+			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
+			UAttributeSet* AS = PS->GetAttributeSet();
+			const FWidgetControllerParams Params(PC,PS,ASC,AS);
+			return HUD->GetSpellMenuController(Params);
+		}
+	}
+	return nullptr;
+}
+
 void UAuraWidgetControllerLibrary::InitializeCharacterClassInfo(const UObject* WorldContextObject,ECharacterClass CharacterClass, float Level,
-	UAbilitySystemComponent* ASC)
+                                                                UAbilitySystemComponent* ASC)
 {
 	AAuraGameMode* Mode =Cast<AAuraGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
 	if (Mode==nullptr) return;
@@ -102,10 +118,18 @@ void UAuraWidgetControllerLibrary::GiveEnemyStartUpAbilities(const UObject* Worl
 
 UCharacterClassInfo* UAuraWidgetControllerLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
 {
-	AAuraGameMode* Mode =Cast<AAuraGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
+	const AAuraGameMode* Mode =Cast<AAuraGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
 	if (Mode==nullptr) return nullptr;
 	
 	return  Mode->CharacterClassInfo;
+}
+
+UAuraAbilityInfo* UAuraWidgetControllerLibrary::GetAbilityInfo(const UObject* WorldContextObject)
+{
+	const AAuraGameMode* Mode =Cast<AAuraGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (Mode==nullptr) return nullptr;
+	
+	return  Mode->AbilityInfo;
 }
 
 bool UAuraWidgetControllerLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)

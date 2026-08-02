@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "AuraHUD.generated.h"
 
+class USpellMenuWidgetController;
 class UAttributeMenuWidgetController;
 class UAttributeSet;
 class UAbilitySystemComponent;
@@ -24,6 +25,7 @@ public:
 	
 	UOverlapWidgetController* GetOverlapWidgetController(const FWidgetControllerParams& Params);
 	UAttributeMenuWidgetController* GetAttributeMenuController(const FWidgetControllerParams& Params);
+	USpellMenuWidgetController* GetSpellMenuController(const FWidgetControllerParams& Params);
 	
 	//初始化相关的widgetController,
 	void InitOverlap(APlayerController* PC,APlayerState* PS,UAbilitySystemComponent* Asc,UAttributeSet* As);
@@ -43,12 +45,19 @@ private:
 	UPROPERTY()
 	TObjectPtr<UOverlapWidgetController> OverlapWidgetController;
 	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UOverlapWidgetController> OverlapWidgetControllerClass;
+	
+	
 	UPROPERTY()
 	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuController;
 	
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UOverlapWidgetController> OverlapWidgetControllerClass;
+	TSubclassOf<UAttributeMenuWidgetController> AttributeWidgetControllerClass;
+	
+	UPROPERTY()
+	TObjectPtr<USpellMenuWidgetController> SpellMenuController;
 	
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAttributeMenuWidgetController> AttributeWidgetControllerClass;
+	TSubclassOf<USpellMenuWidgetController> SpellWidgetControllerClass;
 };

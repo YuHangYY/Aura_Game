@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraWidgetControllerLibrary.generated.h"
 
+class UAuraAbilityInfo;
+class USpellMenuWidgetController;
 struct FGameplayEffectContextHandle;
 class UCharacterClassInfo;
 class UAbilitySystemComponent;
@@ -26,6 +28,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Aura")
 	static UAttributeMenuWidgetController* GetAttributeMenuWidgetController(UObject* WorldContextObject);
 	
+	UFUNCTION(BlueprintPure, Category = "Aura",meta=(DefaultToSelf = "WorldContextObject"))
+	static USpellMenuWidgetController* GetSpellMenuWidgetController(UObject* WorldContextObject);
+	
 	UFUNCTION(BlueprintCallable,Category="Aura")
 	static void InitializeCharacterClassInfo(const UObject* WorldContextObject,ECharacterClass CharacterClass,float Level,UAbilitySystemComponent* ASC);
 	
@@ -34,6 +39,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable,Category="Aura")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+	
+	UFUNCTION(BlueprintCallable,Category="Aura")
+	static UAuraAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
 	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);

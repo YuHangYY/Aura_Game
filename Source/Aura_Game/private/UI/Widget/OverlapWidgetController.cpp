@@ -10,50 +10,44 @@
 
 void UOverlapWidgetController::BroadcastInitialValues()
 {
-	UAuraAttributeSet* AuraAttributeSet = Cast<UAuraAttributeSet>(AttributeSet);
-
-	HealthChangedSign.Broadcast(AuraAttributeSet->GetHealth());
-	MaxHealthChangedSign.Broadcast(AuraAttributeSet->GetMaxHealth());
-	ManaChangedSign.Broadcast(AuraAttributeSet->GetMana());
-	MaxManaChangedSign.Broadcast(AuraAttributeSet->GetMaxMana());
+	HealthChangedSign.Broadcast(GetAuraAttributeSet()->GetHealth());
+	MaxHealthChangedSign.Broadcast(GetAuraAttributeSet()->GetMaxHealth());
+	ManaChangedSign.Broadcast(GetAuraAttributeSet()->GetMana());
+	MaxManaChangedSign.Broadcast(GetAuraAttributeSet()->GetMaxMana());
 	
 }
 
 void UOverlapWidgetController::BindCallbackToDependencies()
 {
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	AuraPlayerState->OnXPChangeDelegate.AddUObject(this,&UOverlapWidgetController::OnXpChange); 
-	AuraPlayerState->OnLevelChangeDelegate.AddLambda(
+	GetAuraPlayerState()->OnXPChangeDelegate.AddUObject(this,&UOverlapWidgetController::OnXpChange); 
+	GetAuraPlayerState()->OnLevelChangeDelegate.AddLambda(
 		[this](int32 NewValue)
 		{
 			OnPlayerLevelChangeDelegate.Broadcast(NewValue);
 		}
 	);
-	
-	
-	
+
 	//绑定回调函数为属性
-	UAuraAttributeSet* AuraAttributeSet = CastChecked<UAuraAttributeSet>(AttributeSet);
 	
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetHealthAttribute()).AddLambda(
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetHealthAttribute()).AddLambda(
 	     [this](const FOnAttributeChangeData&Data)
 	     {
 	     	HealthChangedSign.Broadcast(Data.NewValue);
 	     }
 	);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxHealthAttribute()).AddLambda(
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxHealthAttribute()).AddLambda(
 		 [this](const FOnAttributeChangeData&Data)
 		 {
 		 	MaxHealthChangedSign.Broadcast(Data.NewValue);
 		 }
 		 );
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetManaAttribute()).AddLambda(
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetManaAttribute()).AddLambda(
 		 [this](const FOnAttributeChangeData&Data)
 		 {
 		 	ManaChangedSign.Broadcast(Data.NewValue);
 		 }
 		 );
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AuraAttributeSet->GetMaxManaAttribute()).AddLambda(
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(GetAuraAttributeSet()->GetMaxManaAttribute()).AddLambda(
 		 [this](const FOnAttributeChangeData&Data)
 		 {
 		 	MaxManaChangedSign.Broadcast(Data.NewValue);
@@ -64,11 +58,11 @@ void UOverlapWidgetController::BindCallbackToDependencies()
 	{
 		if (AuraAsc->bAbilityGiven)
 		{
-			OnInitializeStartupAbilities(AuraAsc);
+			BroadcastAbilityInfo();
 		}
 		else
 		{
-			AuraAsc->FAbilityGivenDelegate.AddUObject(this,&UOverlapWidgetController::OnInitializeStartupAbilities);
+			AuraAsc->FAbilityGivenDelegate.AddUObject(this,&UOverlapWidgetController::BroadcastAbilityInfo);
 		}
 		
 	
@@ -91,28 +85,10 @@ void UOverlapWidgetController::BindCallbackToDependencies()
 	
 }
 
-void UOverlapWidgetController::OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraAsc)
-{
-	if (!AuraAsc->bAbilityGiven) return;
-	
-	FForEachAbility BroadcastDelegate;
-	
-	BroadcastDelegate.BindLambda(
-	  [this, AuraAsc](const FGameplayAbilitySpec& AbilitySpec)
-	  {
-	  	//根据获取的Spec 设置输入标签
-		 FAbilityInfo Info =  AbilityInfo->FindAbilityInfoByTag(AuraAsc->GetAbilityTagFromSpec(AbilitySpec));
-	  	 Info.InputTag = AuraAsc->GetInputTagFromSpec(AbilitySpec);
-	  	AbilityInfoDelegate.Broadcast(Info);
-	  }
-	);
-	AuraAsc->ForEachAbility(BroadcastDelegate);
-}
 
 void UOverlapWidgetController::OnXpChange(int32 NewXP)
 {
-	AAuraPlayerState* AuraPlayerState = CastChecked<AAuraPlayerState>(PlayerState);
-	const ULevelUpInfo* LevelUpInfo = AuraPlayerState->LeveLInfoPtr;
+	const ULevelUpInfo* LevelUpInfo = GetAuraPlayerState()->LeveLInfoPtr;
 	
 	const int32 Level = LevelUpInfo->FindLevelForXP(NewXP);
 	const int32 MaxLevel = LevelUpInfo->LeveLInformation.Num();

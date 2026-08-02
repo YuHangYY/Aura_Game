@@ -34,10 +34,7 @@ struct FUIWidgetRow:public FTableRowBase
 struct FOnAttributeChangeData;
 //动态多播委托
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangeSign,float,Newvalue);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSign,FUIWidgetRow,Row);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSign,const FAbilityInfo& ,ABilityInfo);
-
 
 /**
  * 
@@ -70,8 +67,7 @@ public:
 	UPROPERTY(BlueprintAssignable,Category="GAS|Message")
 	FMessageWidgetRowSign MessageWidgetRowDelegate;
 	
-	UPROPERTY(BlueprintAssignable,Category="GAS|Delegate")
-	FAbilityInfoSign AbilityInfoDelegate;
+
 	
 	UPROPERTY(BlueprintAssignable,Category="GAS|XP")
 	FOnAttributeChangeSign OnXPPercentChangeDelegate;
@@ -84,13 +80,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
 	
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Widget Data")
-	TObjectPtr<UAuraAbilityInfo> AbilityInfo; 
+
 	
 	template<class T>
 	T* GetDataTableRowByTag(UDataTable* Table,FGameplayTag& Tag);
-	
-	void OnInitializeStartupAbilities(UAuraAbilitySystemComponent* AuraAsc);
 	
 	void OnXpChange(int32 NewXP);
 };
