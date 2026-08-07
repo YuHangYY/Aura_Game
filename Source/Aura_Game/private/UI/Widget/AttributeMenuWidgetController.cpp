@@ -40,7 +40,7 @@ void UAttributeMenuWidgetController::BroadcastInitialValues()
 		BroadcastAttributeInfo(pair.Key,pair.Value());
 	}
 	
-	
+	 
 	AttributePointChangeDelegate.Broadcast(GetAuraPlayerState()->GetAttributePoints());
 }
 

@@ -13,7 +13,8 @@ struct FGameplayTag;
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer& AssetTags);
 DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FAbilityStatusDelegate, const FGameplayTag& /** AbilityTag**/, const FGameplayTag&/** StatusTag**/);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusDelegate, const FGameplayTag& /** AbilityTag**/, const FGameplayTag&/** StatusTag**/,int32);
+DECLARE_MULTICAST_DELEGATE_FourParams(FEquipAbilityDelegate, const FGameplayTag& /** AbilityTag**/, const FGameplayTag&/** StatusTag**/,const FGameplayTag&/** slot**/,const FGameplayTag&/** preSlot**/);
 
 /**
  * 
@@ -39,7 +40,9 @@ public:
 	
 	static FGameplayTag GetAbilityTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	static FGameplayTag GetInputTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	FGameplayTag GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag);
 	static FGameplayTag GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
+	FGameplayTag GetStatusForAbilityTag(const FGameplayTag& AbilityTag);
 	
 	
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
@@ -47,12 +50,26 @@ public:
 	
 	FGameplayAbilitySpec* GetAbilitySpecFromTag(const FGameplayTag&AbilityTag);
 	
+	void GetAllDescriptionInfo(const FGameplayTag& AbilityTag,FString &CurDescription,FString& NextDescription);
+	
 	UFUNCTION(Server, Reliable)
 	void ServerUpgradeAttribute(const FGameplayTag& AttributeTag);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerSpendPointButtonPressed(const FGameplayTag& AbilityTag);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerEquipAbility(const FGameplayTag& AbilityTag,const FGameplayTag& Slot);
+	
+	
+	void ClearSlot(FGameplayAbilitySpec* Spec);
+	void ClearAbilityOfSlot(FGameplayTag Slot);
+	bool AbilityHasSlot(const FGameplayAbilitySpec& Spec,const FGameplayTag& slot);
 	
 	FEffectAssetTags EffectAssetTags;
 	FAbilitiesGiven FAbilityGivenDelegate;
 	FAbilityStatusDelegate OnAbilityStatusDelegate;
+	FEquipAbilityDelegate OnEquipAbility;
 	
 	bool bAbilityGiven = false;
 protected:
@@ -60,5 +77,8 @@ protected:
 	void ClientEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveGameplayEffectHandle);
 
 	UFUNCTION(Client,Reliable)
-	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag);
+	void ClientUpdateAbilityStatus(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag,const int32& Level);
+	
+	UFUNCTION(Client,Reliable)
+	void ClientEquipAbility(const FGameplayTag& AbilityTag,const FGameplayTag& Status,const FGameplayTag& Slot,const FGameplayTag& PreSlot);
 };

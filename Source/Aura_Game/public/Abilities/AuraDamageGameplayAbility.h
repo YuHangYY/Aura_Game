@@ -28,4 +28,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	FTaggedMontage GetRandomAttackMontageFromArray(const TArray<FTaggedMontage>& MontageArray);
+	
+	float GetDamageByTag(int32 Level,const FGameplayTag& AbilityTag);
 };

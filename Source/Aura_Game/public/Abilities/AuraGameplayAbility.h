@@ -18,5 +18,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input")
 	FGameplayTag StartupInputTag;
 	
-
+	virtual FString GetDescriptionCurrent(int32 Level);
+	virtual FString GetNextDescription(int32 Level);
+	static FString GetLockedDescriptionCurrent();
+	
+	float GetManaCost(int32 Level = 1.f);
+	float GetCooldown(int32 Level = 1.f);
 };

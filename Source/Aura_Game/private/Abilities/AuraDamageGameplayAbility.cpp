@@ -38,3 +38,8 @@ FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontageFromArray(const
 	}
 	return FTaggedMontage();
 }
+
+float UAuraDamageGameplayAbility::GetDamageByTag(int32 Level, const FGameplayTag& AbilityTag)
+{
+	return DamageTypes[AbilityTag].GetValueAtLevel(Level);
+}

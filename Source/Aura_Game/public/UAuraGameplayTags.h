@@ -50,6 +50,7 @@ public:
 	//Abilities
 	FGameplayTag Ability_Attack;
 	FGameplayTag Ability_Summon;
+	FGameplayTag Ability_None;
 	
 	
 	FGameplayTag Ability_HitReact;

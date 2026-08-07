@@ -139,14 +139,34 @@ FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbi
 	return FGameplayTag();
 }
 
+FGameplayTag UAuraAbilitySystemComponent::GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (FGameplayAbilitySpec* Spec = GetAbilitySpecFromTag(AbilityTag))
+	{
+		return GetInputTagFromSpec(*Spec);
+	}
+	return FGameplayTag();
+}
+
 FGameplayTag UAuraAbilitySystemComponent::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
 {
+	if (!IsValid(AbilitySpec.Ability)) return FGameplayTag();
+	
 	for (FGameplayTag StatusTag : AbilitySpec.DynamicAbilityTags)
 	{
 		if (StatusTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Ability.Status"))))
 		{
 			return StatusTag;
 		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag UAuraAbilitySystemComponent::GetStatusForAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (FGameplayAbilitySpec* Spec = GetAbilitySpecFromTag(AbilityTag))
+	{
+		return GetStatusTagFromSpec(*Spec);
 	}
 	return FGameplayTag();
 }
@@ -176,7 +196,7 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)
 			AbilitySpec.DynamicAbilityTags.AddTag(FUAuraGameplayTags::Get().Ability_Status_Eligible);
 			GiveAbility(AbilitySpec);
 			MarkAbilitySpecDirty(AbilitySpec);
-			ClientUpdateAbilityStatus(Info.AbilityTag,FUAuraGameplayTags::Get().Ability_Status_Eligible);
+			ClientUpdateAbilityStatus(Info.AbilityTag,FUAuraGameplayTags::Get().Ability_Status_Eligible,1);
 		}
 	}
 }
@@ -197,9 +217,120 @@ FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetAbilitySpecFromTag(const F
 	return nullptr;
 }
 
-void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag)
+void UAuraAbilitySystemComponent::GetAllDescriptionInfo(const FGameplayTag& AbilityTag,FString& CurDescription, FString& NextDescription)
 {
-	OnAbilityStatusDelegate.Broadcast(AbilityTag,StatusTag);
+	if (FGameplayAbilitySpec* Spec =  GetAbilitySpecFromTag(AbilityTag)) 
+	{
+		if (UAuraGameplayAbility* Ability = Cast<UAuraGameplayAbility>(Spec->Ability))
+		{
+			CurDescription = Ability->GetDescriptionCurrent(Spec->Level);
+			NextDescription = Ability->GetNextDescription(Spec->Level+1);
+		}
+	}
+	else
+	{
+		CurDescription = UAuraGameplayAbility::GetLockedDescriptionCurrent();
+		NextDescription = FString();
+	}
+}
+
+void UAuraAbilitySystemComponent::ClearSlot(FGameplayAbilitySpec* Spec)
+{
+	FGameplayTag SlotTag = GetInputTagFromSpec(*Spec);
+	Spec->DynamicAbilityTags.RemoveTag(SlotTag);
+	MarkAbilitySpecDirty(*Spec);
+}
+
+void UAuraAbilitySystemComponent::ClearAbilityOfSlot(FGameplayTag Slot)
+{
+	FScopedAbilityListLock ActiveScopedLock(*this);
+	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (AbilityHasSlot(Spec, Slot))
+		{
+			ClearSlot(&Spec);
+		}
+	}
+}
+
+bool UAuraAbilitySystemComponent::AbilityHasSlot(const FGameplayAbilitySpec& Spec, const FGameplayTag& slot)
+{
+	for (const FGameplayTag& Tag: Spec.DynamicAbilityTags)
+	{
+		if (Tag.MatchesTag(slot))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void UAuraAbilitySystemComponent::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag,
+	const FGameplayTag& Status, const FGameplayTag& Slot, const FGameplayTag& PreSlot)
+{
+	OnEquipAbility.Broadcast(AbilityTag,Status,Slot,PreSlot);
+}
+
+void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& Slot)
+{
+	FUAuraGameplayTags Tags = FUAuraGameplayTags::Get();
+	if (FGameplayAbilitySpec* Spec = GetAbilitySpecFromTag(AbilityTag))
+	{
+		FGameplayTag PreSlot = GetInputTagFromSpec(*Spec);
+		FGameplayTag Status = GetStatusTagFromSpec(*Spec);
+		
+		const bool bStatusValid = Status == FUAuraGameplayTags::Get().Ability_Status_Equipped ||  Status == FUAuraGameplayTags::Get().Ability_Status_Unlocked;
+		if (bStatusValid)
+		{
+			ClearAbilityOfSlot(Slot);
+			ClearSlot(Spec);
+			  
+			Spec->DynamicAbilityTags.RemoveTag(Slot);
+			if (Status.MatchesTagExact(Tags.Ability_Status_Unlocked))
+			{
+				Spec->DynamicAbilityTags.RemoveTag(Tags.Ability_Status_Unlocked);
+				Spec->DynamicAbilityTags.AddTag(Tags.Ability_Status_Equipped);
+			}
+			
+		}
+		MarkAbilitySpecDirty(*Spec);
+		ClientEquipAbility(AbilityTag,Tags.Ability_Status_Equipped,Slot,PreSlot);
+	}
+}
+
+void UAuraAbilitySystemComponent::ServerSpendPointButtonPressed_Implementation(const FGameplayTag& AbilityTag)
+{
+	
+	FUAuraGameplayTags GameplayTags = FUAuraGameplayTags::Get();
+	
+	if (FGameplayAbilitySpec* AbilitySpec = GetAbilitySpecFromTag(AbilityTag))
+	{
+		if (GetAvatarActor()->Implements<UPlayerInterface>())
+		{
+			IPlayerInterface::Execute_AddToSpellPoint(GetAvatarActor(),-1);
+		}
+		
+		FGameplayTag StatusTag = GetStatusTagFromSpec(*AbilitySpec);
+		if (StatusTag.MatchesTag(GameplayTags.Ability_Status_Eligible))
+		{
+			AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Ability_Status_Eligible);
+			AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Ability_Status_Unlocked);
+			
+			StatusTag = GameplayTags.Ability_Status_Unlocked;
+		}
+		else if (StatusTag.MatchesTag(GameplayTags.Ability_Status_Equipped)||StatusTag.MatchesTag(GameplayTags.Ability_Status_Unlocked) )
+		{
+			AbilitySpec->Level += 1;
+		}
+		
+		ClientUpdateAbilityStatus(AbilityTag,StatusTag,AbilitySpec->Level);
+		MarkAbilitySpecDirty(*AbilitySpec);
+	}
+}
+
+void UAuraAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag,const FGameplayTag& StatusTag,const int32& Level)
+{
+	OnAbilityStatusDelegate.Broadcast(AbilityTag,StatusTag,Level);
 	
 }
 
