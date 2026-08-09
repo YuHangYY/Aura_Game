@@ -2,6 +2,8 @@
 
 
 #include "UI/Widget/OverlapWidgetController.h"
+
+#include "UAuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Player/AuraPlayerState.h"
@@ -56,6 +58,8 @@ void UOverlapWidgetController::BindCallbackToDependencies()
 	
 	if (UAuraAbilitySystemComponent* AuraAsc = Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent))
 	{
+		
+		GetAuraAbilitySystemComponent()->OnEquipAbility.AddUObject(this,&UOverlapWidgetController::OnAbilityEquip);
 		if (AuraAsc->bAbilityGiven)
 		{
 			BroadcastAbilityInfo();
@@ -106,4 +110,20 @@ void UOverlapWidgetController::OnXpChange(int32 NewXP)
 		OnXPPercentChangeDelegate.Broadcast(XPPercent);
 	}
 	
+}
+
+void UOverlapWidgetController::OnAbilityEquip(const FGameplayTag& AbilityTag, const FGameplayTag& Status,const FGameplayTag& Slot, const FGameplayTag& PreSlot)
+{
+	FAbilityInfo LastAbilityInfo;
+	LastAbilityInfo.InputTag = PreSlot;
+	LastAbilityInfo.AbilityTag = FUAuraGameplayTags::Get().Ability_None;
+	LastAbilityInfo.StatusTag = FUAuraGameplayTags::Get().Ability_Status_Unlocked;
+	
+	AbilityInfoDelegate.Broadcast(LastAbilityInfo);
+	
+	FAbilityInfo Info = AbilityInfo->FindAbilityInfoByTag(AbilityTag);
+	Info.StatusTag = Status;
+	Info.InputTag = Slot;
+	
+	AbilityInfoDelegate.Broadcast(Info);
 }

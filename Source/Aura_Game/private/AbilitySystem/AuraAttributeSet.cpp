@@ -4,9 +4,11 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AuraAbilityType.h"
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
 #include "UAuraGameplayTags.h"
+#include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 #include "Interaction/CombatInterface.h"
 #include "Interaction/PlayerInterface.h"
 #include "Library/AuraWidgetControllerLibrary.h"
@@ -119,6 +121,23 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 	
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
+		HandleIncomingDamage(Props);
+	}
+	
+	if (Data.EvaluatedData.Attribute == GetInComingXPAttribute())
+	{
+		HandleIncomingXp(Props);
+	
+	}
+}
+
+void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
+{
+		if (Props.SourceAvatarActor->Implements<UCombatInterface>())
+		{
+			if (ICombatInterface::Execute_IsDead(Props.SourceAvatarActor) )return;
+		}
+	
 		const float LocalIncomingDamage = GetIncomingDamage();
 		SetIncomingDamage(0.f);
 		if (LocalIncomingDamage > 0.f)
@@ -144,8 +163,13 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				TagContainer.AddTag(FUAuraGameplayTags::Get().Effects_HitReact);
 				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 				
+				
 			}
 			
+			if (UAuraWidgetControllerLibrary::IsSuccessfulDebuff(Props.SourceEffectContextHandle))
+			{
+				Debuff(Props);
+			}
 			//显示伤害在目标身上
 			if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourcePC))
 			{
@@ -161,39 +185,89 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectMo
 				const bool isCritical = UAuraWidgetControllerLibrary::IsCriticalHit(Props.SourceEffectContextHandle);
 				PC->ShowDamageText(LocalIncomingDamage,Props.TargetAvatarCharacter,isBlock,isCritical);
 			}
+			
+			
 		}
 	}
-	
-	if (Data.EvaluatedData.Attribute == GetInComingXPAttribute())
-	{
-		const float LocalIncomingXP = GetInComingXP();
-		SetInComingXP(0.f);
+
+void UAuraAttributeSet::HandleIncomingXp(const FEffectProperties& Props)
+{
+	const float LocalIncomingXP = GetInComingXP();
+	SetInComingXP(0.f);
 		  
-		if (Props.SourceAvatarActor->Implements<UCombatInterface>() && Props.SourceAvatarActor->Implements<UCombatInterface>())
+	if (Props.SourceAvatarActor->Implements<UPlayerInterface>() && Props.SourceAvatarActor->Implements<UCombatInterface>())
+	{
+		const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceAvatarCharacter);
+		const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceAvatarCharacter);
+		const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceAvatarCharacter,CurrentXP + LocalIncomingXP);
+			
+		const int32 NumOfLevelUp = NewLevel - CurrentLevel;
+		if (NumOfLevelUp > 0)
 		{
-			const int32 CurrentLevel = ICombatInterface::Execute_GetPlayerLevel(Props.SourceAvatarCharacter);
-			const int32 CurrentXP = IPlayerInterface::Execute_GetXP(Props.SourceAvatarCharacter);
-			const int32 NewLevel = IPlayerInterface::Execute_FindLevelForXP(Props.SourceAvatarCharacter,CurrentXP + LocalIncomingXP);
-			
-			const int32 NumOfLevelUp = NewLevel - CurrentLevel;
-			if (NumOfLevelUp > 0)
-			{
-				const int32 LocalAttributePoint = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceAvatarCharacter,CurrentLevel);
-				const int32 LocalSpellPoint = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceAvatarCharacter,CurrentLevel);
+			const int32 LocalAttributePoint = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceAvatarCharacter,CurrentLevel);
+			const int32 LocalSpellPoint = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceAvatarCharacter,CurrentLevel);
 				
-				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceAvatarCharacter,NumOfLevelUp);
-				IPlayerInterface::Execute_AddToAttributePoint(Props.SourceAvatarCharacter,LocalAttributePoint);
-				IPlayerInterface::Execute_AddToSpellPoint(Props.SourceAvatarCharacter,LocalSpellPoint);
+			IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceAvatarCharacter,NumOfLevelUp);
+			IPlayerInterface::Execute_AddToAttributePoint(Props.SourceAvatarCharacter,LocalAttributePoint);
+			IPlayerInterface::Execute_AddToSpellPoint(Props.SourceAvatarCharacter,LocalSpellPoint);
 				
-				bTopOffMana = true;
-				bTopOffHealth = true;
+			bTopOffMana = true;
+			bTopOffHealth = true;
 				
-				IPlayerInterface::Execute_LevelUp(Props.SourceAvatarCharacter);
-			}
-			
-			IPlayerInterface::Execute_AddToXP(Props.SourceAvatarCharacter,LocalIncomingXP);
+			IPlayerInterface::Execute_LevelUp(Props.SourceAvatarCharacter);
 		}
+			
+		IPlayerInterface::Execute_AddToXP(Props.SourceAvatarCharacter,LocalIncomingXP);
+	}
+}
+
+void UAuraAttributeSet::Debuff(const FEffectProperties& Props)
+{
+	FUAuraGameplayTags GameplayTags = FUAuraGameplayTags::Get();
+	//动态创建Effect
+	FGameplayEffectContextHandle EffectContextHand = Props.SourceASC->MakeEffectContext();
+	EffectContextHand.AddSourceObject(Props.SourceAvatarActor);
 	
+	FGameplayTag DamageType = UAuraWidgetControllerLibrary::GetDamageType(Props.SourceEffectContextHandle);
+	float DebuffDamage = UAuraWidgetControllerLibrary::GetDebuffDamage(Props.SourceEffectContextHandle);
+	float DebuffDuration = UAuraWidgetControllerLibrary::GetDebuffDuration(Props.SourceEffectContextHandle);
+	float DebuffFrequency = UAuraWidgetControllerLibrary::GetDebuffFrequency(Props.SourceEffectContextHandle);
+	
+	//创建一个空的Effect
+	FString DebuffName = FString::Printf(TEXT("DynamicDebuff%s"),*DamageType.ToString());
+	UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(),FName(DebuffName));
+	
+	//设置内部参数
+	Effect->DurationPolicy = EGameplayEffectDurationType::HasDuration;
+	Effect->Period = DebuffFrequency;
+	Effect->DurationMagnitude = FScalableFloat(DebuffDuration);
+	
+	UTargetTagsGameplayEffectComponent& TargetTags = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
+	FInheritedTagContainer Container;
+	Container.Added.AddTag(GameplayTags.DamageTypesTODebuffs[DamageType]);
+	Container.CombinedTags.AddTag(GameplayTags.DamageTypesTODebuffs[DamageType]);
+	TargetTags.SetAndApplyTargetTagChanges(Container);
+	
+	Effect->StackingType = EGameplayEffectStackingType::AggregateBySource;
+	Effect->StackLimitCount = 1;
+	
+	const int32 Index = Effect->Modifiers.Num();
+	Effect->Modifiers.Add(FGameplayModifierInfo());
+	FGameplayModifierInfo& Modifier = Effect->Modifiers[Index];
+	
+	Modifier.ModifierMagnitude = FScalableFloat(DebuffDamage);
+	Modifier.Attribute = GetIncomingDamageAttribute();
+	Modifier.ModifierOp = EGameplayModOp::Additive;
+	
+	FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect,EffectContextHand);
+	if (MutableSpec)
+	{
+		FAuraGameplayEffectContext* AuraContext = static_cast<FAuraGameplayEffectContext*>(EffectContextHand.Get());
+		TSharedPtr<FGameplayTag> DebuffDamageType = MakeShareable(new FGameplayTag(DamageType));
+		AuraContext->SetDamageType(DebuffDamageType);	
+		
+		const FActiveGameplayEffectHandle Handle = Props.TargetASC->ApplyGameplayEffectSpecToSelf(*MutableSpec);
+		
 	}
 }
 
@@ -214,6 +288,8 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 	}
 	
 }
+
+
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {

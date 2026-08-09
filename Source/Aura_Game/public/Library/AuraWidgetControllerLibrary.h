@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraWidgetControllerLibrary.generated.h"
 
+struct FGameplayTag;
+struct FDamageEffectParams;
 class UAuraAbilityInfo;
 class USpellMenuWidgetController;
 struct FGameplayEffectContextHandle;
@@ -43,17 +45,47 @@ public:
 	UFUNCTION(BlueprintCallable,Category="Aura")
 	static UAuraAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 	
-	UFUNCTION(BlueprintCallable, Category="Effect")
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);
 	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static bool IsSuccessfulDebuff(const FGameplayEffectContextHandle& EffectContextHandle);
 	
-	UFUNCTION(BlueprintCallable, Category="Effect")
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
 	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static float GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static float GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static float GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static FGameplayTag GetDamageType(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static void SetBlockedHit(FGameplayEffectContextHandle& EffectContextHandle,bool bBlockedHit);
 	
-	UFUNCTION(BlueprintCallable, Category="Effect")
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static void SetCriticalHit(FGameplayEffectContextHandle& EffectContextHandle,bool bCriticalHit);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetSuccessfulDebuff(FGameplayEffectContextHandle& EffectContextHandle,bool bCriticalHit); 
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetDebuffDamage(FGameplayEffectContextHandle& EffectContextHandle,float InDebuffDamage);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetDebuffDuration(FGameplayEffectContextHandle& EffectContextHandle,float InDebuffDuration);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetDebuffFrequency(FGameplayEffectContextHandle& EffectContextHandle,float InDebuffFrequency);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetDamageType(FGameplayEffectContextHandle& EffectContextHandle,const FGameplayTag& InDamageType);
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
 	static void GetLifeActorWithingRadius(const UObject* WorldContextObject,TArray<AActor*> &OutActors,const TArray<AActor*> OtherActors,float Radius,FVector SphereLocation);
@@ -63,4 +95,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject,ECharacterClass CharacterClass,int32 Level);
+	
+	UFUNCTION(BlueprintCallable, Category="DamageEffect")
+	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
 };

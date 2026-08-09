@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AuraAbilityType.h"
 #include "character/AuraCharacter.h"
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* Target)
@@ -13,12 +14,12 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* Target)
 	{
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect,ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
 	
-		for (TTuple<FGameplayTag, FScalableFloat> Pair:DamageTypes)
-		{
 		
-			float DamageMagnitudePair = Pair.Value.GetValueAtLevel(ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle,Pair.Key,DamageMagnitudePair);
-		}
+		
+		
+		float DamageMagnitudePair = Damage.GetValueAtLevel(ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle,DamageType,DamageMagnitudePair);
+		
 	
 		UAbilitySystemComponent* Asc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
 		if (Asc)
@@ -29,6 +30,24 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* Target)
 	
 }
 
+FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* Target) const
+{
+	FDamageEffectParams Param;
+	Param.WorldContextObject = GetAvatarActorFromActorInfo();
+	Param.DamageGameplayEffectClass = DamageEffect;
+	Param.SourceAbilitySystemComponent = GetAbilitySystemComponentFromActorInfo();
+	Param.TargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
+	Param.BaseDamage = Damage.GetValueAtLevel(GetAbilityLevel());
+	Param.AbilityLevel = GetAbilityLevel();
+	Param.DamageType = DamageType;
+	Param.DebuffChance = DebuffChance;
+	Param.DebuffDamage = DebuffDamage;
+	Param.DebuffFrequency = DebuffFrequency;
+	Param.DebuffDamageDuration = DebuffDuration;
+	return Param;
+
+}
+
 FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontageFromArray(const TArray<FTaggedMontage>& MontageArray)
 {
 	if (MontageArray.Num() > 0)
@@ -37,9 +56,4 @@ FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontageFromArray(const
 		return  MontageArray[size];
 	}
 	return FTaggedMontage();
-}
-
-float UAuraDamageGameplayAbility::GetDamageByTag(int32 Level, const FGameplayTag& AbilityTag)
-{
-	return DamageTypes[AbilityTag].GetValueAtLevel(Level);
 }

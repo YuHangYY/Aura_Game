@@ -285,7 +285,7 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 			ClearAbilityOfSlot(Slot);
 			ClearSlot(Spec);
 			  
-			Spec->DynamicAbilityTags.RemoveTag(Slot);
+			Spec->DynamicAbilityTags.AddTag(Slot);
 			if (Status.MatchesTagExact(Tags.Ability_Status_Unlocked))
 			{
 				Spec->DynamicAbilityTags.RemoveTag(Tags.Ability_Status_Unlocked);

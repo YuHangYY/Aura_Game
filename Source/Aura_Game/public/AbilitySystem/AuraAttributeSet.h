@@ -69,6 +69,10 @@ public:
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 	
+	void HandleIncomingDamage(const FEffectProperties& Props);
+	void HandleIncomingXp(const FEffectProperties& Props);
+	void Debuff(const FEffectProperties& Props);
+	
 	
 	TMap<FGameplayTag,TStaFuncPtr<FGameplayAttribute()>> TagToAttributeMapping;
 	

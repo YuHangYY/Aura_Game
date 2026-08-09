@@ -2,6 +2,51 @@
 
 #include "GameplayEffectTypes.h"
 #include "AuraAbilityType.generated.h"
+
+class UGameplayEffect;
+
+USTRUCT(BlueprintType)
+struct FDamageEffectParams
+{
+	GENERATED_BODY()
+	
+	FDamageEffectParams(){};
+	
+	UPROPERTY()
+	TObjectPtr<UObject>	WorldContextObject = nullptr;
+	
+	UPROPERTY()
+	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent = nullptr;
+	
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent = nullptr;
+	
+	UPROPERTY()
+	float BaseDamage = 0.f;
+	
+	UPROPERTY()
+	float AbilityLevel = 1.f;
+	
+	UPROPERTY()
+	FGameplayTag DamageType = FGameplayTag();
+	
+	UPROPERTY()
+	float DebuffChance = 0.f;
+	
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+	
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+	
+	UPROPERTY()
+	float DebuffDamageDuration = 0.f;
+};
+
+
 USTRUCT(BlueprintType)
 struct FAuraGameplayEffectContext : public FGameplayEffectContext
 {
@@ -10,9 +55,20 @@ struct FAuraGameplayEffectContext : public FGameplayEffectContext
 public:
 	bool IsCriticalHit()const{return bIsCriticalHit;}
 	bool IsBlockHit()const{return bIsBlockHit;}
+	bool IsSuccessfulDebuff()const{return bSuccessfulDebuff;}
 	
+	void SetSuccessfulDebuff(bool isSuccessfulDebuff){bSuccessfulDebuff = isSuccessfulDebuff;}
 	void SetCriticalHit(bool InIsCriticalHit){bIsCriticalHit = InIsCriticalHit; };
 	void SetBlockHit(bool InIsBlockHit){bIsBlockHit = InIsBlockHit; };
+	void SetDebuffDamage(float Damage){DebuffDamage = Damage; };
+	void SetDebuffFrequency(float Frequency){DebuffFrequency = Frequency; };
+	void SetDebuffDuration(float Duration){DebuffDuration = Duration; };
+	void SetDamageType(TSharedPtr<FGameplayTag> Tag){DamageType = Tag; };
+	
+	float GetDebuffDamage()const{return DebuffDamage;}
+	float GetDebuffFrequency()const{return DebuffFrequency;}
+	float GetDebuffDuration()const{return DebuffDuration;}  
+	TSharedPtr<FGameplayTag> GetDamageType()const{return DamageType;}
 	
 	/** 返回用于序列化的实际结构体，子类必须重写此方法！* */
 	virtual UScriptStruct* GetScriptStruct() const override
@@ -21,7 +77,7 @@ public:
 	}
 	
 	/** Creates a copy of this context, used to duplicate for later modifications */
-	virtual FAuraGameplayEffectContext* Duplicate() const
+	virtual FAuraGameplayEffectContext* Duplicate() const override
 	{
 		FAuraGameplayEffectContext* NewContext = new FAuraGameplayEffectContext();
 		*NewContext = *this;
@@ -42,6 +98,20 @@ protected:
 	
 	UPROPERTY()
 	bool bIsCriticalHit  = false;
+	
+	UPROPERTY()
+	bool bSuccessfulDebuff = false;
+	
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+	
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+	
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+	
+	TSharedPtr<FGameplayTag> DamageType;
 };
 
 template<>

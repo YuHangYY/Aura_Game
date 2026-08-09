@@ -79,6 +79,18 @@ public:
 	FGameplayTag DamageTag_Arcane;//奥术伤害
 	FGameplayTag DamageTag_Physical;//物理伤害
 	
+	//Debuff
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Arcane;
+	FGameplayTag Debuff_Physical;
+	
+	
+	FGameplayTag Debuff_Chance;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Frequency;
+	FGameplayTag Debuff_Duration;
+	
 	//CombatSocket
 	FGameplayTag CombatSocket_Weapon; 
 	FGameplayTag CombatSocket_RightHand;
@@ -95,6 +107,7 @@ public:
 	FGameplayTag Attribute_Meta_IncomingXP;
 	
 	TMap<FGameplayTag,FGameplayTag> DamageTypesTOResistances;
+	TMap<FGameplayTag,FGameplayTag> DamageTypesTODebuffs;
 protected:
 	
 private:

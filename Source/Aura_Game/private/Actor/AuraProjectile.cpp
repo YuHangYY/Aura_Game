@@ -49,11 +49,9 @@ void AAuraProjectile::BeginPlay()
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!DamageEffectSpecHandle.IsValid() ||!DamageEffectSpecHandle.Data.IsValid())
-	{
-		return;
-	}
-	if (DamageEffectSpecHandle.IsValid()&& DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	AActor* SourActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	
+	if (SourActor&& SourActor == OtherActor)
 	{
 		return;
 	}
@@ -61,7 +59,7 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		return;
 	}
-	if (!UAuraWidgetControllerLibrary::ISBothFirend(DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser(),OtherActor))
+	if (!UAuraWidgetControllerLibrary::ISBothFirend(SourActor,OtherActor))
 	{
 		return;
 	}
@@ -79,7 +77,8 @@ void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		if (UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			TargetAsc->ApplyGameplayEffectSpecToTarget(*DamageEffectSpecHandle.Data.Get(),TargetAsc);
+			DamageEffectParams.TargetAbilitySystemComponent = TargetAsc;
+			UAuraWidgetControllerLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
 		
 		Destroy();

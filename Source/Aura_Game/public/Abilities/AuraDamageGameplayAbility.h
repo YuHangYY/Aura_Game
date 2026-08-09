@@ -7,6 +7,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
+struct FDamageEffectParams;
 struct FTaggedMontage;
 /**
  * 
@@ -19,15 +20,36 @@ class AURA_GAME_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 public:
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* Target);
+	
+	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* Target =nullptr)const ;
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TSubclassOf<UGameplayEffect> DamageEffect;
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Damage")
-	TMap<FGameplayTag,FScalableFloat> DamageTypes;
+	FGameplayTag DamageType;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Damage")
+	FScalableFloat Damage;
+	
+	/*Debuff*/
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	float DebuffChance = 20.f; 
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	float DebuffDamage = 5.f; 
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	float DebuffFrequency = 1.f; 
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	float DebuffDuration = 5.f; 
+	
+	/*Debuff*/
+	
 	
 	UFUNCTION(BlueprintCallable)
 	FTaggedMontage GetRandomAttackMontageFromArray(const TArray<FTaggedMontage>& MontageArray);
 	
-	float GetDamageByTag(int32 Level,const FGameplayTag& AbilityTag);
 };

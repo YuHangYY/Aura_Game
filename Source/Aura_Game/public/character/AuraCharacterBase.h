@@ -11,6 +11,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UDebuffNiagaraComponent;
 class UNiagaraSystem;
 class UGameplayAbility;
 class UGameplayEffect;
@@ -50,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
 	USoundBase* DeathSound;
 	
+	FOnASCRegistered OnAscRegistered;
+	FOnDeath OnDeath;
+	
 protected:
 	
 	virtual void BeginPlay() override;
@@ -83,6 +87,9 @@ protected:
 	virtual int32 GetMinionCount_Implementation() override;
 	virtual void SetMinionCount_Implementation(int32 NewCount) override;
 	virtual ECharacterClass GetCharacterClassByClass_Implementation() override;
+	
+	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
+	virtual FOnDeath GetOnDeathDelegate() override;
 	
 	//技能系统组件
 	UPROPERTY()
@@ -128,4 +135,6 @@ private:
 	UPROPERTY(EditAnywhere,Category="Combat")
 	TArray<FTaggedMontage> AttackMontage;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UDebuffNiagaraComponent> DebuffNiagaraComponent;
 };

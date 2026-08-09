@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "UAuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura_Game/Aura_Game.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -15,6 +16,11 @@ AAuraCharacterBase::AAuraCharacterBase()
 {
  	
 	PrimaryActorTick.bCanEverTick = false;
+	
+	DebuffNiagaraComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
+	DebuffNiagaraComponent->SetupAttachment(GetRootComponent());
+	DebuffNiagaraComponent->DebuffTag = FUAuraGameplayTags::Get().Debuff_Burn;
+	
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
@@ -70,6 +76,8 @@ void AAuraCharacterBase::OnMulticastClientDeath_Implementation()
 	
 	DisSolve();
 	bIsDead = true;
+	
+	OnDeath.Broadcast(this);
 }
 
 void AAuraCharacterBase::BeginPlay()
@@ -159,6 +167,16 @@ void AAuraCharacterBase::SetMinionCount_Implementation(int32 NewCount)
 ECharacterClass AAuraCharacterBase::GetCharacterClassByClass_Implementation()
 {
 	return CharacterClass;
+}
+
+FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnAscRegistered;
+}
+
+FOnDeath AAuraCharacterBase::GetOnDeathDelegate()
+{
+	return OnDeath;
 }
 
 

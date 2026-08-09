@@ -163,6 +163,8 @@ void USpellMenuWidgetController::OnAbilityEquip(const FGameplayTag& AbilityTag, 
 	
 	AbilityInfoDelegate.Broadcast(Info);
 	StopWaitOnEquipButtonDelegate.Broadcast(AbilityInfo->FindAbilityInfoByTag(SelectedAbility.Ability).AbilityType);
+	SpellGlobeReasDelegate.Broadcast(AbilityTag);
+	DeselectButton();
 	
 }
 

@@ -6,11 +6,15 @@
 #include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
 #include "CombatInterface.generated.h"
+class UAbilitySystemComponent;
 enum class ECharacterClass : uint8;
 class UNiagaraSystem;
 struct FGameplayTag;
 class UAnimMontage;
 // This class does not need to be modified.
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered,UAbilitySystemComponent*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath,AActor*,DeathActor);
+
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -45,6 +49,9 @@ class AURA_GAME_API ICombatInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	
+	virtual FOnASCRegistered GetOnASCRegisteredDelegate() = 0;
+	virtual FOnDeath GetOnDeathDelegate() = 0;
 	
 	UFUNCTION(BlueprintNativeEvent)
 	 int32 GetPlayerLevel();

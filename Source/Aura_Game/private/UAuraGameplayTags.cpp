@@ -50,13 +50,29 @@ void FUAuraGameplayTags::InitializeNativeGameplayTags()
 	//DamageType
 	GameplayTags.DamageTag_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("DamageTag.Fire"),FString("Fire Damage Type"));
 	GameplayTags.DamageTag_Lightning = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("DamageTag.Lightning"),FString("Lightning Damage Type"));
-	GameplayTags.DamageTag_Arcane = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("DamageTag.Lightning"),FString("Lightning Damage Type"));
+	GameplayTags.DamageTag_Arcane = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("DamageTag.Arcane"),FString("Arcane Damage Type"));
 	GameplayTags.DamageTag_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("DamageTag.Physical"),FString("Physical Damage Type"));
+	
+	//Debuff
+	GameplayTags.Debuff_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Chance"),FString("Fire Damage Type"));
+	GameplayTags.Debuff_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Frequency"),FString("Lightning Damage Type"));
+	GameplayTags.Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Damage"),FString("Arcane Damage Type"));
+	GameplayTags.Debuff_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Duration"),FString("Physical Damage Type"));
+	
+	GameplayTags.Debuff_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Burn"),FString("Fire Damage Type"));
+	GameplayTags.Debuff_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Stun"),FString("Lightning Damage Type"));
+	GameplayTags.Debuff_Arcane = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Arcane"),FString("Arcane Damage Type"));
+	GameplayTags.Debuff_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Debuff.Physical"),FString("Physical Damage Type"));
 	
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Fire,GameplayTags.Attribute_Resistance_Fire);
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Lightning,GameplayTags.Attribute_Resistance_Lightning);
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Arcane,GameplayTags.Attribute_Resistance_Arcane);
 	GameplayTags.DamageTypesTOResistances.Add(GameplayTags.DamageTag_Physical,GameplayTags.Attribute_Resistance_Physical);
+	
+	GameplayTags.DamageTypesTODebuffs.Add(GameplayTags.DamageTag_Fire,GameplayTags.Debuff_Burn);
+	GameplayTags.DamageTypesTODebuffs.Add(GameplayTags.DamageTag_Lightning,GameplayTags.Debuff_Stun);
+	GameplayTags.DamageTypesTODebuffs.Add(GameplayTags.DamageTag_Arcane,GameplayTags.Debuff_Arcane);
+	GameplayTags.DamageTypesTODebuffs.Add(GameplayTags.DamageTag_Physical,GameplayTags.Debuff_Physical);
 	
 	//CombatSocket
 	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"),FString());

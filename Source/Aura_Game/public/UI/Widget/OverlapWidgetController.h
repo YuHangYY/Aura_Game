@@ -86,6 +86,7 @@ protected:
 	T* GetDataTableRowByTag(UDataTable* Table,FGameplayTag& Tag);
 	
 	void OnXpChange(int32 NewXP);
+	void OnAbilityEquip(const FGameplayTag& AbilityTag, const FGameplayTag& Status,const FGameplayTag& Slot, const FGameplayTag& PreSlot);
 };
 
 template <class T>
