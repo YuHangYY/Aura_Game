@@ -321,3 +321,45 @@ FGameplayEffectContextHandle UAuraWidgetControllerLibrary::ApplyDamageEffect(con
 	return EffectContextHandle;
 	
 }
+
+TArray<FRotator> UAuraWidgetControllerLibrary::EvenlySpacedRotators(const FVector& Forward, const FVector& Axis,float Spread,int32 NumProjectile)
+{
+	TArray<FRotator> Rotators;
+	
+	FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f,Axis);
+	if (NumProjectile > 1)
+	{
+		const float DeltaSpread = Spread / (NumProjectile - 1);
+		for ( int32 i = 0; i < NumProjectile; ++i)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i,FVector::UpVector);
+			Rotators.Add(Direction.Rotation());
+		}
+	}
+	else
+	{
+		Rotators.Add(Forward.Rotation());	
+	}
+	
+	return Rotators;
+}
+
+TArray<FVector> UAuraWidgetControllerLibrary::EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis,float Spread,int32 NumProjectile)
+{
+	TArray<FVector> Vectors;
+	FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f,Axis);
+	if (NumProjectile > 1)
+	{
+		const float DeltaSpread = Spread / (NumProjectile - 1);
+		for ( int32 i = 0; i < NumProjectile; ++i)
+		{
+			const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i,FVector::UpVector);
+			Vectors.Add(Direction);
+		}
+	}
+	else
+	{
+		Vectors.Add(Forward);	
+	}
+	return Vectors;
+}

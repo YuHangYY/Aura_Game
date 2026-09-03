@@ -98,4 +98,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="DamageEffect")
 	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
+	
+	UFUNCTION(BlueprintPure)
+	static TArray<FRotator> EvenlySpacedRotators(const FVector& Forward,const FVector& Axis,float Spread,int32 NumProjectile);
+	
+	UFUNCTION(BlueprintPure)
+	static TArray<FVector> EvenlyRotatedVectors(const FVector& Forward,const FVector& Axis,float Spread,int32 NumProjectile);
 };

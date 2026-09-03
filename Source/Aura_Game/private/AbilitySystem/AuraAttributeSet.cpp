@@ -138,14 +138,21 @@ void UAuraAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 			if (ICombatInterface::Execute_IsDead(Props.SourceAvatarActor) )return;
 		}
 	
+	if (Props.TargetAvatarActor->Implements<UCombatInterface>())
+	{
+		if (ICombatInterface::Execute_IsDead(Props.TargetAvatarActor) )return;
+	}
+	
 		const float LocalIncomingDamage = GetIncomingDamage();
 		SetIncomingDamage(0.f);
 		if (LocalIncomingDamage > 0.f)
 		{
 			float NewHealth = GetHealth() - LocalIncomingDamage;
 			SetHealth(FMath::Clamp(NewHealth,0.f,GetMaxHealth()));
+			float health = GetHealth();
+			bool is = GetHealth() < 20;
 			
-			const bool bDeath = GetHealth() <= 0.f;
+			bool bDeath = GetHealth() <= 0;
 			if (bDeath)
 			{
 				//死亡
@@ -214,10 +221,15 @@ void UAuraAttributeSet::HandleIncomingXp(const FEffectProperties& Props)
 			bTopOffMana = true;
 			bTopOffHealth = true;
 				
+		
+			
 			IPlayerInterface::Execute_LevelUp(Props.SourceAvatarCharacter);
 		}
 			
 		IPlayerInterface::Execute_AddToXP(Props.SourceAvatarCharacter,LocalIncomingXP);
+		
+		SetMaxHealth(GetMaxHealth());
+		SetMaxMana(GetMaxMana());
 	}
 }
 
@@ -275,11 +287,6 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 	
-	if (Attribute == GetMaxHealthAttribute()&&bTopOffHealth)
-	{
-		SetHealth(GetMaxHealth());
-		bTopOffHealth = false;
-	}
 	
 	if (Attribute == GetMaxManaAttribute() &&bTopOffMana)
 	{
@@ -287,6 +294,11 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 		bTopOffMana = false;
 	}
 	
+	if (Attribute == GetMaxHealthAttribute() &&bTopOffHealth)
+	{
+		SetHealth(NewValue);
+		bTopOffHealth = false;
+	}
 }
 
 

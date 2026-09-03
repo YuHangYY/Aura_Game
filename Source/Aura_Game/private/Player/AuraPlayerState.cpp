@@ -75,7 +75,6 @@ void AAuraPlayerState::AddToLevel(int32 InLevel)
 {
 	Level +=InLevel;
 	OnLevelChangeDelegate.Broadcast(Level);
-	
 }
 
 void AAuraPlayerState::AddToAttributePoints(int32 InAttributePoints)

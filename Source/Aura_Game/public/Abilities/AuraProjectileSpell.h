@@ -28,5 +28,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TSubclassOf<AAuraProjectile> SpawnClass;
 	
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile")
+	int32 NumProjectiles = 5;
 };
