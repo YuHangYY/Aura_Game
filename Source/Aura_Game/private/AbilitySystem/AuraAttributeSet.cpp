@@ -220,16 +220,12 @@ void UAuraAttributeSet::HandleIncomingXp(const FEffectProperties& Props)
 				
 			bTopOffMana = true;
 			bTopOffHealth = true;
-				
-		
 			
 			IPlayerInterface::Execute_LevelUp(Props.SourceAvatarCharacter);
 		}
 			
 		IPlayerInterface::Execute_AddToXP(Props.SourceAvatarCharacter,LocalIncomingXP);
 		
-		SetMaxHealth(GetMaxHealth());
-		SetMaxMana(GetMaxMana());
 	}
 }
 
@@ -296,7 +292,7 @@ void UAuraAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute,
 	
 	if (Attribute == GetMaxHealthAttribute() &&bTopOffHealth)
 	{
-		SetHealth(NewValue);
+		SetHealth(GetMaxHealth());
 		bTopOffHealth = false;
 	}
 }

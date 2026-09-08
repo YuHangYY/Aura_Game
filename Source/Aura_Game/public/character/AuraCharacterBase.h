@@ -77,6 +77,7 @@ protected:
 	bool bIsDead = false;
 	
 	virtual void Die() override; 
+	virtual USkeletalMeshComponent* GetWeaponComponent_Implementation() override;
 	virtual FVector GetCombaWeaponLocation_Implementation(const FGameplayTag& MontageTag)override;
 	virtual UAnimMontage*GetHitAnimMontage_Implementation()override;
 	virtual bool IsDead_Implementation() const override;

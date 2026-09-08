@@ -44,6 +44,11 @@ void AAuraCharacterBase::Die()
 	OnMulticastClientDeath();
 }
 
+USkeletalMeshComponent* AAuraCharacterBase::GetWeaponComponent_Implementation()
+{
+	return Weapon;
+}
+
 void AAuraCharacterBase::DisSolve()
 {
 	if (IsValid(DisSolveMaterial))

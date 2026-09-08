@@ -53,6 +53,9 @@ public:
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate() = 0;
 	virtual FOnDeath GetOnDeathDelegate() = 0;
 	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
+	USkeletalMeshComponent* GetWeaponComponent();
+	
 	UFUNCTION(BlueprintNativeEvent)
 	 int32 GetPlayerLevel();
 	
@@ -90,4 +93,7 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	ECharacterClass GetCharacterClassByClass();
+	
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)	
+	void SetIsShockLoop(bool IsShockLoop);
 };

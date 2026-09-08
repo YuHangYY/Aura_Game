@@ -54,6 +54,24 @@ void UAuraAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSub
 	}
 }
 
+void UAuraAbilitySystemComponent::AbilityInputPress(const FGameplayTag& InputTag)
+{
+	if (!InputTag.IsValid()) return;
+	
+	//遍历所有可激活的技能
+	for ( FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{   //找与输入对应标签的标签
+		if (Spec.DynamicAbilityTags.HasTagExact(InputTag))
+		{    
+			AbilitySpecInputPressed(Spec);
+			if (Spec.IsActive())
+			{    
+				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed,Spec.Handle,Spec.ActivationInfo.GetActivationPredictionKey());
+			}
+		}
+	}
+}
+
 void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
@@ -80,10 +98,11 @@ void UAuraAbilitySystemComponent::AbilityInputTagRelease(const FGameplayTag& Inp
 	//遍历所有可激活的技能
 	for ( FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{   //找与输入对应标签的标签
-		if (Spec.DynamicAbilityTags.HasTagExact(InputTag))
+		if (Spec.DynamicAbilityTags.HasTagExact(InputTag) && Spec.IsActive())
 		{     
 			AbilitySpecInputReleased(Spec);
-			
+			//当技能触发释放保证能触发的关键一步
+			InvokeReplicatedEvent( EAbilityGenericReplicatedEvent::InputReleased,Spec.Handle,Spec.ActivationInfo.GetActivationPredictionKey());
 		}
 	}
 }

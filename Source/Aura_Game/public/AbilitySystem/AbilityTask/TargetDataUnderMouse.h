@@ -21,6 +21,8 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FMouseUnderData DataValid;
+
+
 	
 private:
 	virtual void Activate() override;
