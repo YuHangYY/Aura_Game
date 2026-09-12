@@ -21,7 +21,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* Target);
 	
+	UFUNCTION(BlueprintCallable)
 	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* Target =nullptr)const ;
+	
+	UFUNCTION(BlueprintPure)
+	float GetDamageAtLevel()const;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")

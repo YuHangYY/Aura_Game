@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Abilities/AuraDamageGameplayAbility.h"
@@ -46,6 +46,11 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassD
 	Param.DebuffDamageDuration = DebuffDuration;
 	return Param;
 
+}
+
+float UAuraDamageGameplayAbility::GetDamageAtLevel() const
+{
+	return Damage.GetValueAtLevel(GetAbilityLevel());
 }
 
 FTaggedMontage UAuraDamageGameplayAbility::GetRandomAttackMontageFromArray(const TArray<FTaggedMontage>& MontageArray)

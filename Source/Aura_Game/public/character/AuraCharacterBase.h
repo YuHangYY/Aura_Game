@@ -25,6 +25,7 @@ class AURA_GAME_API AAuraCharacterBase : public ACharacter ,public  IAbilitySyst
 
 public:
 	AAuraCharacterBase();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	//获取技能系统组件
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	//获取属性集
@@ -53,7 +54,12 @@ public:
 	
 	FOnASCRegistered OnAscRegistered;
 	FOnDeath OnDeath;
+	FOnDeathDelegate OnDeathDelegate;
 	
+	UPROPERTY(Replicated,BlueprintReadOnly)
+	bool IsStun = false;
+	
+	virtual void StunTagChance(const FGameplayTag CallTag,int32 NewCount);
 protected:
 	
 	virtual void BeginPlay() override;
@@ -76,7 +82,11 @@ protected:
 	
 	bool bIsDead = false;
 	
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
+	float BaseWalkSpeed = 600.f;
+	
 	virtual void Die() override; 
+	virtual FOnDeathDelegate& GetOnDeathDelegate2() override;
 	virtual USkeletalMeshComponent* GetWeaponComponent_Implementation() override;
 	virtual FVector GetCombaWeaponLocation_Implementation(const FGameplayTag& MontageTag)override;
 	virtual UAnimMontage*GetHitAnimMontage_Implementation()override;

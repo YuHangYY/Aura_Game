@@ -14,6 +14,7 @@ class UAnimMontage;
 // This class does not need to be modified.
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered,UAbilitySystemComponent*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath,AActor*,DeathActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathDelegate,AActor*,DeathActor);
 
 
 USTRUCT(BlueprintType)
@@ -72,6 +73,8 @@ public:
 	TArray<FTaggedMontage> GetAttackAnimMontage();
 	
 	virtual void Die() = 0;
+	
+	virtual FOnDeathDelegate& GetOnDeathDelegate2() = 0;
 	
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	bool IsDead()const;

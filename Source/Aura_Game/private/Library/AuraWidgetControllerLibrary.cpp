@@ -282,6 +282,39 @@ void UAuraWidgetControllerLibrary::GetLifeActorWithingRadius(const UObject* Worl
 	}
 }
 
+void UAuraWidgetControllerLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors,TArray<AActor*>& OutCloseTargets,const FVector& Origin)
+{
+	
+	
+	if (Actors.Num() <= MaxTargets)
+	{
+		OutCloseTargets = Actors;
+		return;
+	}
+	
+	TArray<AActor*> ActorsToCheck;
+	int32 NumTargetsFound = 0;
+	
+	while (NumTargetsFound < MaxTargets)
+	{
+		if (ActorsToCheck.Num() == 0) break;
+		double ClosestDistance = TNumericLimits<double>::Max();
+		AActor* ClosestActor;
+		for (AActor* Actor : ActorsToCheck)
+		{
+			const double LocalDistance = (Actor->GetActorLocation() - Origin).Length();
+			if (LocalDistance < ClosestDistance)
+			{
+				ClosestDistance = LocalDistance;
+				ClosestActor = Actor;
+			}
+		}
+		ActorsToCheck.Remove(ClosestActor);
+		OutCloseTargets.Add(ClosestActor);
+		NumTargetsFound++;
+	}
+}
+
 bool UAuraWidgetControllerLibrary::ISBothFirend(AActor* FirstActor, AActor* SecondActor)
 {
 	const bool ISBothPlayer = FirstActor->ActorHasTag(FName("Player"))&&SecondActor->ActorHasTag(FName("Player"));

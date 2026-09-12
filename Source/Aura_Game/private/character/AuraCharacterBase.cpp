@@ -9,7 +9,9 @@
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Aura_Game/Aura_Game.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 
 AAuraCharacterBase::AAuraCharacterBase()
@@ -32,6 +34,13 @@ AAuraCharacterBase::AAuraCharacterBase()
 	CharacterClass = ECharacterClass::Elementalist;
 }
 
+void AAuraCharacterBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AAuraCharacterBase,IsStun)
+}
+
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
@@ -42,6 +51,11 @@ void AAuraCharacterBase::Die()
 	//死亡则掉落武器
 	Weapon->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	OnMulticastClientDeath();
+}
+
+FOnDeathDelegate& AAuraCharacterBase::GetOnDeathDelegate2()
+{
+	return OnDeathDelegate;
 }
 
 USkeletalMeshComponent* AAuraCharacterBase::GetWeaponComponent_Implementation()
@@ -83,6 +97,14 @@ void AAuraCharacterBase::OnMulticastClientDeath_Implementation()
 	bIsDead = true;
 	
 	OnDeath.Broadcast(this);
+	OnDeathDelegate.Broadcast(this);
+}
+
+void AAuraCharacterBase::StunTagChance(const FGameplayTag CallTag, int32 NewCount)
+{
+	IsStun = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = IsStun ? 0:BaseWalkSpeed;
+	
 }
 
 void AAuraCharacterBase::BeginPlay()

@@ -2,7 +2,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "BehaviorTree/BehaviorTreeTypes.h"
 #include "character/AuraCharacterBase.h"
 #include "Interaction/EnemyInterface.h"
@@ -43,8 +42,7 @@ public:
 	UPROPERTY(BlueprintReadOnly,Category="Combat")
 	bool bIsHitReact = false;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Combat")
-	float BaseWalkSpeed = 250.f;
+
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Combat")
 	float LifeSpan = 5.f;
@@ -57,6 +55,7 @@ protected:
 	virtual  void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttribute() const override;
+	virtual void StunTagChance(const FGameplayTag CallTag, int32 NewCount) override;
 	
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;

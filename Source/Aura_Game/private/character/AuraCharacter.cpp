@@ -4,6 +4,7 @@
 #include "character/AuraCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "NiagaraComponent.h"
+#include "UAuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -163,6 +164,10 @@ void AAuraCharacter::InitAbilityActorInfo()
 			
 			AuraHUD->InitOverlap(AuraPlayerController,AuraPlayerState,AbilitySystemComponent,AttributeSet);
 		}
+	}
+	if (IsValid(AbilitySystemComponent))
+	{ 
+		AbilitySystemComponent->RegisterGameplayTagEvent(FUAuraGameplayTags::Get().Debuff_Stun,EGameplayTagEventType::NewOrRemoved).AddUObject(this,&AAuraCharacter::StunTagChance);
 	}
 	InitializeDefaultAttribute();
 	

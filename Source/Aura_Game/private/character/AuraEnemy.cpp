@@ -34,7 +34,7 @@ AAuraEnemy::AAuraEnemy()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true ;
 	
-	
+	BaseWalkSpeed = 250.f;
 }
 
 void AAuraEnemy::PossessedBy(AController* NewController)
@@ -123,12 +123,12 @@ void AAuraEnemy::BeginPlay()
 			}
 		);
 	}
+
 	//当收到游戏效果传过来的标签时调用的委托
 	AbilitySystemComponent->RegisterGameplayTagEvent(FUAuraGameplayTags::Get().Effects_HitReact,EGameplayTagEventType::NewOrRemoved).AddUObject(
 		this,//当接受到新的或者删除该标签就调用函数
 		&AAuraEnemy::OnHitReactChange
 	);
-	
 	
 	OnHealthChange.Broadcast(AuraAttributes->GetHealth());
 	OnMaxHealthChange.Broadcast(AuraAttributes->GetMaxHealth());
@@ -158,11 +158,26 @@ void AAuraEnemy::InitAbilityActorInfo()
 	}
 	
 	OnAscRegistered.Broadcast(AbilitySystemComponent);
+	
+	AbilitySystemComponent->RegisterGameplayTagEvent(FUAuraGameplayTags::Get().Debuff_Stun,EGameplayTagEventType::NewOrRemoved).AddUObject(
+		this,//当接受到新的或者删除该标签就调用函数
+		&AAuraEnemy::StunTagChance
+	); 
 }
 
 void AAuraEnemy::InitializeDefaultAttribute() const
 {
 	UAuraWidgetControllerLibrary::InitializeCharacterClassInfo(this,CharacterClass,Level,GetAbilitySystemComponent());
+}
+
+void AAuraEnemy::StunTagChance(const FGameplayTag CallTag, int32 NewCount)
+{
+	Super::StunTagChance(CallTag, NewCount);
+	if (AuraAIController&&AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReaching"),bIsHitReact);
+	}
+	
 }
 
 

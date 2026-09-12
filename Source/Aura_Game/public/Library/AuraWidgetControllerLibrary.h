@@ -91,6 +91,9 @@ public:
 	static void GetLifeActorWithingRadius(const UObject* WorldContextObject,TArray<AActor*> &OutActors,const TArray<AActor*> OtherActors,float Radius,FVector SphereLocation);
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
+	static void GetClosestTargets(int32 MaxTargets,const TArray<AActor*>& Actors,TArray<AActor*>& OutCloseTarget,const FVector& Origin);
+	
+	UFUNCTION(BlueprintCallable, Category="Effect")
 	static bool ISBothFirend(AActor*FirstActor,AActor* SecondActor);
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
