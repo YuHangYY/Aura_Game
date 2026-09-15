@@ -59,6 +59,7 @@ void UAuraAbilitySystemComponent::AbilityInputPress(const FGameplayTag& InputTag
 	if (!InputTag.IsValid()) return;
 	
 	//遍历所有可激活的技能
+	FScopedAbilityListLock ActiveScopedLock(*this);
 	for ( FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{   //找与输入对应标签的标签
 		if (Spec.DynamicAbilityTags.HasTagExact(InputTag))
@@ -77,6 +78,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputT
 	if (!InputTag.IsValid()) return;
 	
 	//遍历所有可激活的技能
+	FScopedAbilityListLock ActiveScopedLock(*this);
 	for ( FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{   //找与输入对应标签的标签
 		if (Spec.DynamicAbilityTags.HasTagExact(InputTag))
@@ -96,6 +98,7 @@ void UAuraAbilitySystemComponent::AbilityInputTagRelease(const FGameplayTag& Inp
 	if (!InputTag.IsValid()) return;
 	
 	//遍历所有可激活的技能
+	FScopedAbilityListLock ActiveScopedLock(*this);
 	for ( FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{   //找与输入对应标签的标签
 		if (Spec.DynamicAbilityTags.HasTagExact(InputTag) && Spec.IsActive())
@@ -190,6 +193,51 @@ FGameplayTag UAuraAbilitySystemComponent::GetStatusForAbilityTag(const FGameplay
 	return FGameplayTag();
 }
 
+bool UAuraAbilitySystemComponent::SlotIsEmpty(const FGameplayTag& Slot)
+{
+	FScopedAbilityListLock ActiveScopedLock(*this);
+	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (AbilityHasSlot(Spec, Slot))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool UAuraAbilitySystemComponent::IsPassiveAbility(const FGameplayAbilitySpec& AbilitySpec)
+{
+	UAuraAbilityInfo* Info = UAuraWidgetControllerLibrary::GetAbilityInfo(GetAvatarActor());
+	const FGameplayTag& AbilityTag = GetAbilityTagFromSpec(AbilitySpec);
+	const FAbilityInfo AbilityInfo = Info->FindAbilityInfoByTag(AbilityTag);
+	return AbilityInfo.AbilityType.MatchesTagExact(FUAuraGameplayTags::Get().Ability_Type_Passive);
+}
+
+FGameplayAbilitySpec* UAuraAbilitySystemComponent::GetSpecFromSlot(const FGameplayTag& Slot)
+{
+	FScopedAbilityListLock ActiveScopedLock(*this);
+	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (AbilityHasSlot(Spec, Slot))
+		{
+			return &Spec;
+		}
+	}
+	return nullptr;
+}
+
+bool UAuraAbilitySystemComponent::AbilityHasAnySlot(const FGameplayAbilitySpec& Spec)
+{
+	return Spec.DynamicAbilityTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Input")));
+}
+
+void UAuraAbilitySystemComponent::AssignSlotToAbility(FGameplayAbilitySpec& Spec, const FGameplayTag& SlotTag)
+{
+	ClearSlot(&Spec);
+	Spec.DynamicAbilityTags.AddTag(SlotTag);
+}
+
 void UAuraAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
 	//如果属性点大于0的时候调用服务器端去更改统一的属性点数据
@@ -208,7 +256,7 @@ void UAuraAbilitySystemComponent::UpdateAbilityStatus(int32 Level)
 	UAuraAbilityInfo* AbilityInfo = UAuraWidgetControllerLibrary::GetAbilityInfo(GetAvatarActor());
 	for (const FAbilityInfo& Info : AbilityInfo->AbilityInformation)
 	{
-		if (Level < Info.LevelRequirement) return;
+		if (Level < Info.LevelRequirement) continue;
 		if (GetAbilitySpecFromTag(Info.AbilityTag) == nullptr)
 		{
 			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.GameplayAbility,1);
@@ -253,6 +301,11 @@ void UAuraAbilitySystemComponent::GetAllDescriptionInfo(const FGameplayTag& Abil
 	}
 }
 
+void UAuraAbilitySystemComponent::MulticastActivatePassiveEffect_Implementation(const FGameplayTag& AbilityTag,bool IsActivate)
+{
+	ActivatePassiveEffect.Broadcast(AbilityTag,IsActivate);
+}
+
 void UAuraAbilitySystemComponent::ClearSlot(FGameplayAbilitySpec* Spec)
 {
 	FGameplayTag SlotTag = GetInputTagFromSpec(*Spec);
@@ -274,14 +327,7 @@ void UAuraAbilitySystemComponent::ClearAbilityOfSlot(FGameplayTag Slot)
 
 bool UAuraAbilitySystemComponent::AbilityHasSlot(const FGameplayAbilitySpec& Spec, const FGameplayTag& slot)
 {
-	for (const FGameplayTag& Tag: Spec.DynamicAbilityTags)
-	{
-		if (Tag.MatchesTag(slot))
-		{
-			return true;
-		}
-	}
-	return false;
+	return Spec.DynamicAbilityTags.HasTagExact(slot);
 }
 
 void UAuraAbilitySystemComponent::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag,
@@ -301,19 +347,41 @@ void UAuraAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamep
 		const bool bStatusValid = Status == FUAuraGameplayTags::Get().Ability_Status_Equipped ||  Status == FUAuraGameplayTags::Get().Ability_Status_Unlocked;
 		if (bStatusValid)
 		{
-			ClearAbilityOfSlot(Slot);
-			ClearSlot(Spec);
-			  
-			Spec->DynamicAbilityTags.AddTag(Slot);
-			if (Status.MatchesTagExact(Tags.Ability_Status_Unlocked))
+			if (!SlotIsEmpty(Slot)) //判断该输入插槽是否被使用，如果使用则清空该插槽
 			{
-				Spec->DynamicAbilityTags.RemoveTag(Tags.Ability_Status_Unlocked);
-				Spec->DynamicAbilityTags.AddTag(Tags.Ability_Status_Equipped);
+				FGameplayAbilitySpec* SpecWithSlot = GetSpecFromSlot(Slot);
+				if (SpecWithSlot)
+				{
+					//检测这次装备的插槽技能是否是同一个，如果是则直接返回
+					if (AbilityTag.MatchesTagExact(GetAbilityTagFromSpec(*SpecWithSlot)))
+					{
+						ClientEquipAbility(AbilityTag,Tags.Ability_Status_Equipped,Slot,PreSlot);
+						return;
+					}
+					
+					//这个技能如果是被动技能则停止
+					if (IsPassiveAbility(*SpecWithSlot))
+					{
+						MulticastActivatePassiveEffect(AbilityTag,false);
+						DeactivatePassiveAbility.Broadcast(GetAbilityTagFromSpec(*SpecWithSlot));
+					}
+					ClearSlot(SpecWithSlot);
+				}
 			}
 			
+			if (!AbilityHasAnySlot(*Spec))
+			{
+				if (IsPassiveAbility(*Spec))
+				{
+					TryActivateAbility(Spec->Handle);
+					MulticastActivatePassiveEffect(AbilityTag,true);
+				}
+			}
+			AssignSlotToAbility(*Spec,Slot);
+			MarkAbilitySpecDirty(*Spec);
+			ClientEquipAbility(AbilityTag,Tags.Ability_Status_Equipped,Slot,PreSlot);
 		}
-		MarkAbilitySpecDirty(*Spec);
-		ClientEquipAbility(AbilityTag,Tags.Ability_Status_Equipped,Slot,PreSlot);
+	
 	}
 }
 

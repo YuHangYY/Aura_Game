@@ -11,6 +11,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UPassiveNiagaraComponent;
 class UDebuffNiagaraComponent;
 class UNiagaraSystem;
 class UGameplayAbility;
@@ -24,6 +25,7 @@ class AURA_GAME_API AAuraCharacterBase : public ACharacter ,public  IAbilitySyst
 	GENERATED_BODY()
 
 public:
+	virtual void Tick(float DeltaTime) override;
 	AAuraCharacterBase();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	//获取技能系统组件
@@ -98,7 +100,6 @@ protected:
 	virtual int32 GetMinionCount_Implementation() override;
 	virtual void SetMinionCount_Implementation(int32 NewCount) override;
 	virtual ECharacterClass GetCharacterClassByClass_Implementation() override;
-	
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath GetOnDeathDelegate() override;
 	
@@ -148,4 +149,16 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UDebuffNiagaraComponent> DebuffNiagaraComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> HaloOfProtectionNiagaraComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> LifeSiphonNiagaraComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UPassiveNiagaraComponent> ManaSiphonNiagaraComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USceneComponent> EffectAttachComponent;
 };

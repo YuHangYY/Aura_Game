@@ -211,9 +211,15 @@ void UAuraAttributeSet::HandleIncomingXp(const FEffectProperties& Props)
 		const int32 NumOfLevelUp = NewLevel - CurrentLevel;
 		if (NumOfLevelUp > 0)
 		{
-			const int32 LocalAttributePoint = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceAvatarCharacter,CurrentLevel);
-			const int32 LocalSpellPoint = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceAvatarCharacter,CurrentLevel);
-				
+			int32 LocalAttributePoint = 0;
+			int32 LocalSpellPoint = 0;
+			
+			for (int32 i = 0; i < NumOfLevelUp; i++ )
+			{
+				LocalAttributePoint += IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceAvatarCharacter,CurrentLevel + i);
+				LocalSpellPoint += IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceAvatarCharacter,CurrentLevel + i);
+			}
+			
 			IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceAvatarCharacter,NumOfLevelUp);
 			IPlayerInterface::Execute_AddToAttributePoint(Props.SourceAvatarCharacter,LocalAttributePoint);
 			IPlayerInterface::Execute_AddToSpellPoint(Props.SourceAvatarCharacter,LocalSpellPoint);

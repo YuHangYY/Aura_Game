@@ -5,6 +5,13 @@
 
 #include "AbilitySystem/AuraAttributeSet.h"
 
+void UAuraGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+	const FGameplayEventData* TriggerEventData)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
+
 FString UAuraGameplayAbility::GetDescriptionCurrent(int32 Level)
 {
 	return FString::Printf(TEXT("当前技能等级%d,"),Level);

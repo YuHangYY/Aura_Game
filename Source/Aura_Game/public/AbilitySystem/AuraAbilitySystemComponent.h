@@ -15,7 +15,8 @@ DECLARE_MULTICAST_DELEGATE(FAbilitiesGiven);
 DECLARE_DELEGATE_OneParam(FForEachAbility,const FGameplayAbilitySpec&);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FAbilityStatusDelegate, const FGameplayTag& /** AbilityTag**/, const FGameplayTag&/** StatusTag**/,int32);
 DECLARE_MULTICAST_DELEGATE_FourParams(FEquipAbilityDelegate, const FGameplayTag& /** AbilityTag**/, const FGameplayTag&/** StatusTag**/,const FGameplayTag&/** slot**/,const FGameplayTag&/** preSlot**/);
-
+DECLARE_MULTICAST_DELEGATE_OneParam(FDeactivatePassiveAbility, const FGameplayTag& /*AbilityTag*/); //当停用被动技能时调用的委托
+DECLARE_MULTICAST_DELEGATE_TwoParams(FActivatePassiveEffect,const FGameplayTag& ,bool );
 /**
  * 
  */
@@ -44,6 +45,11 @@ public:
 	FGameplayTag GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag);
 	static FGameplayTag GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec);
 	FGameplayTag GetStatusForAbilityTag(const FGameplayTag& AbilityTag);
+	bool SlotIsEmpty(const FGameplayTag& Slot);
+	bool IsPassiveAbility(const FGameplayAbilitySpec& AbilitySpec);
+	FGameplayAbilitySpec* GetSpecFromSlot(const FGameplayTag& Slot);
+	bool AbilityHasAnySlot(const FGameplayAbilitySpec& Spec);
+	void AssignSlotToAbility(FGameplayAbilitySpec& Spec,const FGameplayTag& SlotTag);
 	
 	
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
@@ -62,6 +68,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerEquipAbility(const FGameplayTag& AbilityTag,const FGameplayTag& Slot);
 	
+	UFUNCTION(NetMulticast,Unreliable)
+	void MulticastActivatePassiveEffect(const FGameplayTag& AbilityTag,bool IsActivate);
 	
 	void ClearSlot(FGameplayAbilitySpec* Spec);
 	void ClearAbilityOfSlot(FGameplayTag Slot);
@@ -71,6 +79,8 @@ public:
 	FAbilitiesGiven FAbilityGivenDelegate;
 	FAbilityStatusDelegate OnAbilityStatusDelegate;
 	FEquipAbilityDelegate OnEquipAbility;
+	FDeactivatePassiveAbility DeactivatePassiveAbility; //停用被动技能委托实例
+	FActivatePassiveEffect ActivatePassiveEffect;
 	
 	bool bAbilityGiven = false;
 protected:

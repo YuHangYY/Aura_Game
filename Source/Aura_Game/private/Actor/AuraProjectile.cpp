@@ -49,20 +49,39 @@ void AAuraProjectile::BeginPlay()
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AActor* SourActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
-	
-	if (SourActor&& SourActor == OtherActor)
-	{
-		return;
-	}
 	if (!OtherActor)
 	{
 		return;
 	}
-	if (!UAuraWidgetControllerLibrary::ISBothFirend(SourActor,OtherActor))
+
+	// DamageEffectParams 只存在于服务器生成的投射物上
+	if (!HasAuthority())
+	{
+		IsHit = true;
+		return;
+	}
+
+	UAbilitySystemComponent* SourceASC =
+		DamageEffectParams.SourceAbilitySystemComponent;
+
+	if (!IsValid(SourceASC))
+	{
+		Destroy();
+		return;
+	}
+
+	AActor* SourceActor = SourceASC->GetAvatarActor();
+
+	if (!IsValid(SourceActor) || SourceActor == OtherActor)
 	{
 		return;
 	}
+
+	if (!UAuraWidgetControllerLibrary::ISBothFirend(SourceActor, OtherActor))
+	{
+		return;
+	}
+
 
 	
 	UGameplayStatics::PlaySoundAtLocation(this,ImpactSound,GetActorLocation());

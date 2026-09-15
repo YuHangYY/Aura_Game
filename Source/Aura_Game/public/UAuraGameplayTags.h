@@ -55,18 +55,28 @@ public:
 	
 	FGameplayTag Ability_HitReact;
 	
+	//技能状态标签
 	FGameplayTag Ability_Status_Locked;
 	FGameplayTag Ability_Status_Eligible;
 	FGameplayTag Ability_Status_Unlocked;
 	FGameplayTag Ability_Status_Equipped;
 	
+	//技能类型标签
 	FGameplayTag Ability_Type_Passive;
 	FGameplayTag Ability_Type_Offensive;
 	FGameplayTag Ability_Type_None;
 	
+	//技能标签
 	FGameplayTag Ability_Fire_FireBolt;
 	FGameplayTag Ability_Lightning_Electrocute;
 	
+	//被动技能标签
+	FGameplayTag Ability_Passive_HaloOfProtection; //被动技能1 守护光环
+	FGameplayTag Ability_Passive_LifeSiphon; //吸取生命来恢复自身
+	FGameplayTag Ability_Passive_ManaSiphon; //吸取法力来回复
+	
+	
+	//冷却标签
 	FGameplayTag Cooldown_Fire_FireBolt;
 	
 	//Effect

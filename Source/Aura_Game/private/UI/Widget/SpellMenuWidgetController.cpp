@@ -46,7 +46,7 @@ void USpellMenuWidgetController::BindCallbackToDependencies()
 			CurrentSpellPoint = InSpellPoints;
 			bool SpendPointButton = false;
 			bool EquipButton = false;
-			ShouldEnableButtons(SelectedAbility.Ability,CurrentSpellPoint,SpendPointButton,EquipButton);
+			ShouldEnableButtons(SelectedAbility.Status,CurrentSpellPoint,SpendPointButton,EquipButton);
 			
 			FString CurrentDesc;
 			FString NextDesc;

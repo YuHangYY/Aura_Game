@@ -15,6 +15,7 @@ class AURA_GAME_API UAuraGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 	
 public:
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Input")
 	FGameplayTag StartupInputTag;
 	
