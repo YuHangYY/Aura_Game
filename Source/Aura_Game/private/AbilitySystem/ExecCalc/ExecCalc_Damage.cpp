@@ -9,6 +9,7 @@
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "kismet/KismetMathLibrary.h"
 #include "Library/AuraWidgetControllerLibrary.h"
 
@@ -126,6 +127,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	AActor* SourActor = SourceAsc->GetAvatarActor();
 	AActor* TargetActor = TargetAsc->GetAvatarActor();
 	
+	
+	
 	int32 SourcePlayerLevel = 1;
 	if (SourActor->Implements<UCombatInterface>())
 	{
@@ -139,6 +142,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	}
 	
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	
 	const FGameplayTagContainer* SourceTag = Spec.CapturedSourceTags.GetAggregatedTags();
 	const FGameplayTagContainer* TargetTag = Spec.CapturedTargetTags.GetAggregatedTags();
@@ -162,13 +166,41 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		const FGameplayEffectAttributeCaptureDefinition ResistanceDef = TagToCaptureDef[ResistanceTypeTag];
 		
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag);
-		
+		if (DamageTypeValue<=0.f)
+		{
+			continue;
+		}
 		
 		float Resistance = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(ResistanceDef,AggregatorEvaluatorParams,Resistance);
 		Resistance = FMath::Clamp(Resistance,0.f,100.f);
 		
 		DamageTypeValue *= (100.f - Resistance)/100.f;
+		
+		//判断有没有产生范围伤害
+		if (UAuraWidgetControllerLibrary::IsRadialDamage(EffectContextHandle))
+		{
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetActor))
+			{
+				CombatInterface->GetOnDamageDelegate().AddLambda([&](float DamageAmount)
+				{
+					DamageTypeValue = DamageAmount;
+				});
+			}
+			
+			//应用完系统伤害，TargetActor就会调用TakeDamage形成闭环
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				TargetActor
+				,DamageTypeValue
+				,0,
+				UAuraWidgetControllerLibrary::GetRadialDamageOrigin(EffectContextHandle)
+				,UAuraWidgetControllerLibrary::GetRadialDamageInnerRadius(EffectContextHandle)
+				,UAuraWidgetControllerLibrary::GetRadialDamageOuterRadius(EffectContextHandle)
+				,1.f,UDamageType::StaticClass()
+				,TArray<AActor*>()
+				,SourActor
+				,nullptr);
+		}
 		Damage += DamageTypeValue;
 	}
 	
@@ -180,7 +212,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	bool isBlock =UKismetMathLibrary::RandomFloatInRange(1,100)<=Blockchange;
 	Damage = isBlock? Damage*=0.5f: Damage;
 	
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+	
 	UAuraWidgetControllerLibrary::SetBlockedHit(EffectContextHandle,isBlock);
 	
 	//护甲

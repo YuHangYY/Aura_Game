@@ -68,7 +68,7 @@ void UAuraAbilitySystemComponent::AbilityInputPress(const FGameplayTag& InputTag
 			if (Spec.IsActive())
 			{    
 				InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputPressed,Spec.Handle,Spec.ActivationInfo.GetActivationPredictionKey());
-			}
+			} 
 		}
 	}
 }

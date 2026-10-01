@@ -69,6 +69,7 @@ public:
 	//技能标签
 	FGameplayTag Ability_Fire_FireBolt;
 	FGameplayTag Ability_Lightning_Electrocute;
+	FGameplayTag Ability_Arcane_ArcaneShard;
 	
 	//被动技能标签
 	FGameplayTag Ability_Passive_HaloOfProtection; //被动技能1 守护光环

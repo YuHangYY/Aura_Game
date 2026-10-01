@@ -22,7 +22,7 @@ public:
 	void CauseDamage(AActor* Target);
 	
 	UFUNCTION(BlueprintCallable)
-	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* Target =nullptr)const ;
+	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* Target =nullptr,FVector RadialDamageOrigin = FVector::ZeroVector)const ;
 	
 	UFUNCTION(BlueprintPure)
 	float GetDamageAtLevel()const;
@@ -51,6 +51,16 @@ public:
 	float DebuffDuration = 5.f; 
 	
 	/*Debuff*/
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	bool bIsRadialDamage = false; //本次是否启动伤害削减机制
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	float RadialDamageInnerRadius = 0.f; //伤害削减内半径
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Debuff")
+	float RadialDamageOuterRadius = 0.f; // 伤害削减外半径
+	
 	
 	
 	UFUNCTION(BlueprintCallable)

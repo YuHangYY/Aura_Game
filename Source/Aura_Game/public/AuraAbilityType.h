@@ -12,38 +12,50 @@ struct FDamageEffectParams
 	
 	FDamageEffectParams(){};
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UObject>	WorldContextObject = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent> SourceAbilitySystemComponent = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAbilitySystemComponent> TargetAbilitySystemComponent = nullptr;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float BaseDamage = 0.f;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float AbilityLevel = 1.f;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	FGameplayTag DamageType = FGameplayTag();
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffChance = 0.f;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDamage = 0.f;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffFrequency = 0.f;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	float DebuffDamageDuration = 0.f;
+	
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRadialDamage = false; //本次是否启动伤害削减机制
+	
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f; //伤害削减内半径
+	
+	UPROPERTY(BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f; // 伤害削减外半径
+	
+	UPROPERTY(BlueprintReadWrite)
+	FVector RadialDamageOrigin = FVector::ZeroVector; //径向伤害原点
 };
 
 
@@ -56,6 +68,7 @@ public:
 	bool IsCriticalHit()const{return bIsCriticalHit;}
 	bool IsBlockHit()const{return bIsBlockHit;}
 	bool IsSuccessfulDebuff()const{return bSuccessfulDebuff;}
+	bool IsRadialDamage()const{return bIsRadialDamage;}
 	
 	void SetSuccessfulDebuff(bool isSuccessfulDebuff){bSuccessfulDebuff = isSuccessfulDebuff;}
 	void SetCriticalHit(bool InIsCriticalHit){bIsCriticalHit = InIsCriticalHit; };
@@ -64,10 +77,18 @@ public:
 	void SetDebuffFrequency(float Frequency){DebuffFrequency = Frequency; };
 	void SetDebuffDuration(float Duration){DebuffDuration = Duration; };
 	void SetDamageType(TSharedPtr<FGameplayTag> Tag){DamageType = Tag; };
+	void SetRadialDamage(bool IsRadialDamage){bIsRadialDamage = IsRadialDamage; };
+	void SetRadialDamageInnerRadius(float RadialDamageInnerRadiu){RadialDamageInnerRadius = RadialDamageInnerRadiu; };
+	void SetRadialDamageOuterRadius(float RadialDamageOuterRadiu){RadialDamageOuterRadius = RadialDamageOuterRadiu; };
+	void SetRadialDamageOrigin(FVector Origin){RadialDamageOrigin = Origin; };
 	
 	float GetDebuffDamage()const{return DebuffDamage;}
 	float GetDebuffFrequency()const{return DebuffFrequency;}
 	float GetDebuffDuration()const{return DebuffDuration;}  
+	float GetRadialDamageInnerRadius()const{return RadialDamageInnerRadius;}
+	float GetRadialDamageOuterRadius()const {return RadialDamageOuterRadius;}
+	FVector GetRadialDamageOrigin()const{return RadialDamageOrigin;}
+	
 	TSharedPtr<FGameplayTag> GetDamageType()const{return DamageType;}
 	
 	/** 返回用于序列化的实际结构体，子类必须重写此方法！* */
@@ -110,6 +131,18 @@ protected:
 	
 	UPROPERTY()
 	float DebuffDuration = 0.f;
+	
+	UPROPERTY()
+	bool bIsRadialDamage = false; //本次是否启动伤害削减机制
+	
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f; //伤害削减内半径
+	
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f; // 伤害削减外半径
+	
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector; //径向伤害原点
 	
 	TSharedPtr<FGameplayTag> DamageType;
 };

@@ -55,6 +55,9 @@ public:
 	static bool IsCriticalHit(const FGameplayEffectContextHandle& EffectContextHandle);
 	
 	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static bool IsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static float GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle);
 	
 	UFUNCTION(BlueprintCallable, Category="EffectContext")
@@ -65,6 +68,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static FGameplayTag GetDamageType(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static float GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static float GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static FVector GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle);
 	
 	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static void SetBlockedHit(FGameplayEffectContextHandle& EffectContextHandle,bool bBlockedHit);
@@ -86,6 +98,18 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="EffectContext")
 	static void SetDamageType(FGameplayEffectContextHandle& EffectContextHandle,const FGameplayTag& InDamageType);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetIsRadialDamage(FGameplayEffectContextHandle& EffectContextHandle,bool bRadialDamage);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetRadialDamageInnerRadius(FGameplayEffectContextHandle& EffectContextHandle,float RadialDamageInnerRadius);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetRadialDamageOuterRadius(FGameplayEffectContextHandle& EffectContextHandle,float RadialDamageOuterRadius);
+	
+	UFUNCTION(BlueprintCallable, Category="EffectContext")
+	static void SetRadialDamageOrigin(FGameplayEffectContextHandle& EffectContextHandle,const FVector& RadialDamageOrigin);
 	
 	UFUNCTION(BlueprintCallable, Category="Effect")
 	static void GetLifeActorWithingRadius(const UObject* WorldContextObject,TArray<AActor*> &OutActors,const TArray<AActor*> OtherActors,float Radius,FVector SphereLocation);

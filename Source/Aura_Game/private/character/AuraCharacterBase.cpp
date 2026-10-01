@@ -15,6 +15,14 @@
 #include "Net/UnrealNetwork.h"
 
 
+float AAuraCharacterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float DamageTaken =  Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamageDelegate.Broadcast(DamageTaken);
+	return DamageTaken; 
+}
+
 void AAuraCharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -221,6 +229,11 @@ FOnASCRegistered AAuraCharacterBase::GetOnASCRegisteredDelegate()
 FOnDeath AAuraCharacterBase::GetOnDeathDelegate()
 {
 	return OnDeath;
+}
+
+FOnDamageSignature& AAuraCharacterBase::GetOnDamageDelegate()
+{
+	return OnDamageDelegate;
 }
 
 

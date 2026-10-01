@@ -19,12 +19,17 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class UAttributeSet;
 
+
+
 UCLASS(Abstract)
 class AURA_GAME_API AAuraCharacterBase : public ACharacter ,public  IAbilitySystemInterface,public ICombatInterface
 {
 	GENERATED_BODY()
 
 public:
+	
+	//对该游戏实体造成伤害
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void Tick(float DeltaTime) override;
 	AAuraCharacterBase();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -57,6 +62,7 @@ public:
 	FOnASCRegistered OnAscRegistered;
 	FOnDeath OnDeath;
 	FOnDeathDelegate OnDeathDelegate;
+	FOnDamageSignature OnDamageDelegate;
 	
 	UPROPERTY(Replicated,BlueprintReadOnly)
 	bool IsStun = false;
@@ -102,6 +108,7 @@ protected:
 	virtual ECharacterClass GetCharacterClassByClass_Implementation() override;
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
 	virtual FOnDeath GetOnDeathDelegate() override;
+	virtual FOnDamageSignature& GetOnDamageDelegate() override;
 	
 	//技能系统组件
 	UPROPERTY()

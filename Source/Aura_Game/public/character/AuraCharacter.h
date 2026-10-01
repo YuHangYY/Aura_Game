@@ -33,6 +33,8 @@ public:
 	virtual int32 FindLevelForXP_Implementation(int32 XP) override;
 	virtual int32 GetAttributePoint_Implementation() override;
 	virtual int32 GetSpellPoint_Implementation() override;
+	virtual void ShowMagicCircleDecal_Implementation(UMaterialInterface* DecalMaterial) override;
+	virtual void HideMagicCircleDecal_Implementation() override;
 	//**   playerInterface     **//
 	
 	

@@ -15,6 +15,7 @@ class UAnimMontage;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered,UAbilitySystemComponent*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath,AActor*,DeathActor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathDelegate,AActor*,DeathActor);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature,float/*伤害数值*/)
 
 
 USTRUCT(BlueprintType)
@@ -75,6 +76,7 @@ public:
 	virtual void Die() = 0;
 	
 	virtual FOnDeathDelegate& GetOnDeathDelegate2() = 0;
+	virtual FOnDamageSignature& GetOnDamageDelegate() = 0;
 	
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 	bool IsDead()const;

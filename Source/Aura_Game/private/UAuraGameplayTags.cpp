@@ -101,8 +101,13 @@ void FUAuraGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Ability_Type_Passive = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Type.Passive"),FString());
 	GameplayTags.Ability_Type_Offensive = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Type.Offensive"),FString());
 	
+	//主动技能标签
 	GameplayTags.Ability_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Fire.FireBolt"),FString());
 	GameplayTags.Ability_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Lightning.Electrocute"),FString());
+	GameplayTags.Ability_Arcane_ArcaneShard = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Ability.Arcane.ArcaneShard"),FString());
+	
+	
+	
 	GameplayTags.Cooldown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Cooldown.Fire.FireBolt"),FString());
 	
 	GameplayTags.Player_Block_InputPressed = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Player.Block.InputPressed"),FString());

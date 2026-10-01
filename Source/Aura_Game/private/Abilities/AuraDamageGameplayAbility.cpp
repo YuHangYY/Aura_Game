@@ -13,9 +13,6 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* Target)
 	if (GetAvatarActorFromActorInfo()->Implements<UCombatInterface>())
 	{
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffect,ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
-	
-		
-		
 		
 		float DamageMagnitudePair = Damage.GetValueAtLevel(ICombatInterface::Execute_GetPlayerLevel(GetAvatarActorFromActorInfo()));
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(EffectSpecHandle,DamageType,DamageMagnitudePair);
@@ -30,7 +27,7 @@ void UAuraDamageGameplayAbility::CauseDamage(AActor* Target)
 	
 }
 
-FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* Target) const
+FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* Target,FVector RadialDamageOrigin) const
 {
 	FDamageEffectParams Param;
 	Param.WorldContextObject = GetAvatarActorFromActorInfo();
@@ -44,6 +41,14 @@ FDamageEffectParams UAuraDamageGameplayAbility::MakeDamageEffectParamsFromClassD
 	Param.DebuffDamage = DebuffDamage;
 	Param.DebuffFrequency = DebuffFrequency;
 	Param.DebuffDamageDuration = DebuffDuration;
+	if (bIsRadialDamage)
+	{
+		Param.bIsRadialDamage = bIsRadialDamage;
+		Param.RadialDamageInnerRadius = RadialDamageInnerRadius;
+		Param.RadialDamageOuterRadius = RadialDamageOuterRadius;
+		Param.RadialDamageOrigin = RadialDamageOrigin;
+	}
+	
 	return Param;
 
 }

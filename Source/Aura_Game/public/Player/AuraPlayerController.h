@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AuraPlayerController.generated.h"
 
+class AMagicCircle;
 class UNiagaraSystem;
 class UDamageTextComponent;
 class USplineComponent;
@@ -32,6 +33,12 @@ public:
 	
 	UFUNCTION(Client,Reliable)
 	void  ShowDamageText(float Damage,ACharacter* Chara,bool IsBlock,bool IsCritical);
+	
+	UFUNCTION(BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr); //显示魔法阵特效
+	
+	UFUNCTION(BlueprintCallable)
+	void HideMagicCircle(); //隐藏魔法阵特效
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -88,4 +95,14 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageWidgetComponent;
+	
+	//魔法阵参数
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AMagicCircle> MagicCircleClass;
+	
+	UPROPERTY()
+	TObjectPtr<AMagicCircle> MagicCircle;
+	
+	//魔法阵相关函数
+	void UpdateMagicCircleLocation();
 };
